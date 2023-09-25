@@ -49,7 +49,8 @@ class Router
     /**
      * Constructor initializing the route provider and route collection.
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->provider = new RouteServiceProvider();
         $this->routes = $this->provider->getRoutes();
     }
@@ -60,7 +61,8 @@ class Router
      * @param Request $request HTTP request.
      * @return Response HTTP response.
      */
-    public function dispatch(Request $request): Response {
+    public function dispatch(Request $request): Response
+    {
         $this->requestedInterface = $this->provider->getRequestedInterface($request);
         $response = $this->runRoute($request, $this->routes[$this->requestedInterface['name']]);
         return $this->prepareResponse($response);
@@ -73,7 +75,7 @@ class Router
      * @param RouteCollection $routes Collection of routes for the interface.
      * @return mixed Generated response based on content of requested route.
      */
-    protected function runRoute(Request $request, RouteCollection $routes): mixed
+    private function runRoute(Request $request, RouteCollection $routes): mixed
     {
         $context = new RequestContext();
         $context->fromRequest($request);
@@ -83,25 +85,34 @@ class Router
         try {
             $matcher = $matcher->match($request->getPathInfo());
 
-
             array_walk($matcher, function(&$param) {
                 if(is_numeric($param)) {
                     $param = (int) $param;
                 }
             });
 
-            $params = array_merge(array_slice($matcher, 2, -1), array('request' => $request, 'routes' => $routes));
-
             if (isset($matcher['_controller']) && $matcher['_controller'] instanceof \Closure) {
-                $response = call_user_func_array($matcher['_controller'], array($params));
+                $availableParams = array_merge(array_slice($matcher, 1, -1), array('request' => $request, 'routes' => $routes));
+
+                $reflection = new \ReflectionFunction($matcher['_controller']);
+
+                $params = $this->prepareParameterList($reflection, $availableParams);
+
+                $response = call_user_func_array($matcher['_controller'], $params);
             }
             elseif (isset($matcher['controller']) && isset($matcher['method'])) {
-                $className = '\\App\\Controllers\\' . $matcher['controller'];
+                $availableParams = array_merge(array_slice($matcher, 2, -1), array('request' => $request, 'routes' => $routes));
+
+                $className = '\\App\\Controllers\\'.$matcher['controller'];
                 $classInstance = new $className();
 
                 if (!method_exists($classInstance, $matcher['method'])) {
                     throw new \Exception('Method does not exist');
                 }
+
+                $reflection = new \ReflectionMethod($classInstance, $matcher['method']);
+
+                $params = $this->prepareParameterList($reflection, $availableParams);
 
                 $response = call_user_func_array([$classInstance, $matcher['method']], $params);
             }
@@ -128,7 +139,8 @@ class Router
      * @param mixed $response Route response.
      * @return Response HTTP response.
      */
-    protected function prepareResponse($response): Response {
+    private function prepareResponse($response): Response
+    {
         if (!$response instanceof Response) {
             $response = new Response($response);
         }
@@ -138,5 +150,25 @@ class Router
         }
 
         return $response;
+    }
+
+    /**
+     * Prepare the parameter list for a route handler method or closure based on its reflection and available parameters.
+     *
+     * This method analyzes the reflection of the route handler (either a method or closure) to determine its required parameters.
+     * It then selects the matching parameters from the available parameters list. If no matching parameters are found,
+     * it defaults to passing the 'request' parameter. This ensures that the route handler receives only the parameters it needs.
+     *
+     * @param \ReflectionMethod|\ReflectionFunction $reflection Reflection of the route handler.
+     * @param array $availableParams Available parameters for the route handler.
+     * @return array List of parameters to be passed to the route handler.
+     */
+    private function prepareParameterList(\ReflectionMethod|\ReflectionFunction $reflection, array $availableParams) : array
+    {
+        $reflectionParams = array_map(fn($param) => $param->getName(), $reflection->getParameters());
+
+        $params = array_intersect_key($availableParams, array_flip($reflectionParams));
+
+        return $params ?: [$availableParams['request']];
     }
 }

@@ -4,7 +4,6 @@ namespace Framework\Http;
 
 use Symfony\Component\Routing\Route as SymfonyRoute;
 use Symfony\Component\Routing\RouteCollection;
-// use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class Route
@@ -43,7 +42,8 @@ abstract class Route
      *
      * @return array
      */
-    public static function getRoutes() {
+    public static function getRoutes()
+    {
         return self::$routes;
     }
 
@@ -52,7 +52,8 @@ abstract class Route
      *
      * @param array $keys
      */
-    public static function collection($keys) {
+    public static function collection($keys)
+    {
         foreach($keys as $key) {
             self::$routes[$key] = new RouteCollection();
         }
@@ -64,7 +65,8 @@ abstract class Route
      * @param string $interface
      * @param string $prefix
      */
-    public static function interface($interface, $prefix) {
+    public static function interface($interface, $prefix)
+    {
         self::$interface = $interface;
         self::$prefix = $prefix;
     }
@@ -76,7 +78,8 @@ abstract class Route
      * @param mixed $handler
      * @return \Symfony\Component\Routing\Route
      */
-    private static function prepareRoute($path, $handler) {
+    private static function prepareRoute($path, $handler)
+    {
         $route = new SymfonyRoute(
             self::$prefix.$path,
         );
@@ -99,7 +102,8 @@ abstract class Route
      * @param mixed $handler
      * @param array $params
      */
-    public static function get($name, $path, $handler, $params = []) {
+    public static function get($name, $path, $handler, $params = [])
+    {
         $route = self::prepareRoute($path, $handler);
 
         $route->setRequirements($params)->setMethods('GET');
@@ -114,7 +118,8 @@ abstract class Route
      * @param string $path
      * @param mixed $handler
      */
-    public static function post($name, $path, $handler) {
+    public static function post($name, $path, $handler)
+    {
         $route = self::prepareRoute($path, $handler);
 
         $route->setMethods('POST');
@@ -129,7 +134,8 @@ abstract class Route
      * @param string $path
      * @param mixed $handler
      */
-    public static function put($name, $path, $controller) {
+    public static function put($name, $path, $controller)
+    {
         $route = self::prepareRoute($path, $handler);
 
         $route->setMethods('PUT');
@@ -144,7 +150,8 @@ abstract class Route
      * @param string $path
      * @param mixed $handler
      */
-    public static function delete($name, $path, $controller) {
+    public static function delete($name, $path, $controller)
+    {
         $route = self::prepareRoute($path, $handler);
 
         $route->setMethods('DELETE');
@@ -152,12 +159,19 @@ abstract class Route
         self::$routes->add($name, $route);
     }
 
-    // Additional methods and middleware can be defined here.
+    /**
+     * Define a fallback route to handle unmatched requests.
+     *
+     * This method defines a fallback route that will be executed when no other route matches the incoming request.
+     * The fallback route can be used to display a custom response or perform specific actions when a route is not found.
+     *
+     * @param mixed $handler The handler for the fallback route, which can be a closure or a controller method.
+     */
+    public static function fallback($handler)
+    {
+        $route = self::prepareRoute('/{any}', $handler);
 
-    // public static function guard(Request $request, \Closure $next) {
-    //     $middleware = new HasAuthToken($request);
-    //     if (!$middleware->isAuthorized()) return false;
+        self::$routes[self::$interface]->add('fallback', $route);
+    }
 
-    //     $next();
-    // }
 }

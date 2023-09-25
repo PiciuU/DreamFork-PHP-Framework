@@ -15,7 +15,6 @@ use Framework\Http\Route as Route;
 |
 */
 
-
-Route::get('view', '/example', function() {
-    return '<b>Przykład template</b>';
+Route::get('hello-web', '/', function() {
+    return 'Hello WEB!';
 });
