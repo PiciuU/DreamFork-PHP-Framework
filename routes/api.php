@@ -14,7 +14,6 @@ use Framework\Http\Route as Route;
 |
 */
 
-Route::get('user-register', '/register', function() {
-    return app()->getBasePath()."\n\n";
+Route::get('hello-api', '/hello', function() {
+    return 'Hello API!';
 });
-Route::get('user-login', '/login', [UserController::class, 'login']);
