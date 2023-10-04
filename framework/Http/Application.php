@@ -43,6 +43,20 @@ class Application
     private $basePath;
 
     /**
+     * Instance of the exception handler.
+     *
+     * @var Handler|null
+     */
+    private $handler;
+
+    /**
+     * Instance of the exception handler logger.
+     *
+     * @var Logger|null
+     */
+    private $logger;
+
+    /**
      * Application constructor.
      *
      * @param string $basePath The base path of the application.
@@ -55,7 +69,8 @@ class Application
 
         $this->basePath = $basePath;
 
-        $this->loadEnvironmentVariables();
+        $this->setExceptionHandler();
+        $this->setEnvironmentVariables();
     }
 
     /**
@@ -170,13 +185,31 @@ class Application
      *
      * @throws \RuntimeException If the .env file is not found or if there is an issue loading its contents.
      */
-    private function loadEnvironmentVariables() {
+    private function setEnvironmentVariables() {
         if (!file_exists($this->basePath . '/.env')) {
             throw new \RuntimeException('.env file not found.');
         }
 
         $dotenv = Dotenv::createImmutable($this->basePath);
         $dotenv->load();
+    }
+
+    /**
+     * Set the exception handler and logger instances.
+     */
+    private function setExceptionHandler() {
+        $this->handler = new \App\Exceptions\Handler();
+        $this->logger = $this->handler->getLogger();
+    }
+
+    /**
+     * Get the exception handler instance.
+     *
+     * @param bool $deep Set to true to retrieve the logger instance.
+     * @return Handler|Logger The exception handler instance or logger instance if $deep is true.
+     */
+    public function getExceptionHandler($deep = false) {
+        return $deep ? $this->logger : $this->handler;
     }
 
 }

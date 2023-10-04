@@ -82,11 +82,33 @@ if (!function_exists('base_path')) {
     }
 }
 
+/**
+ * Helper Function: load
+ *
+ * Load a PHP file if it exists.
+ *
+ * @param string $filename The name of the PHP file to load.
+ *
+ * @throws Exception If the file does not exist.
+ */
 if (!function_exists('load')) {
     function load($filename) {
         if (!file_exists($filename))
-            throw new Exception ($filename.' does not exist.');
+            throw new Exception($filename.' does not exist.');
         else
             require_once($filename);
+    }
+}
+
+/**
+ * Helper Function: logger
+ *
+ * Get the exception handler logger instance from the application.
+ *
+ * @return Logger The exception handler logger instance.
+ */
+if (!function_exists('logger')) {
+    function logger() {
+        return app()->getExceptionHandler(true);
     }
 }
