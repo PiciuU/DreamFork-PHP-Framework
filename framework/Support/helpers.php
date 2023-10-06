@@ -1,5 +1,7 @@
 <?php
 
+use Framework\Http\Container;
+
 /**
  * Helper Function: env
  *
@@ -25,8 +27,12 @@ if (!function_exists('env')) {
  * @return Framework\Http\Application The application instance.
  */
 if (!function_exists('app')) {
-    function app() {
-        return Framework\Http\Application::getInstance();
+    function app($abstract = null, $parameters = []) {
+        if (is_null($abstract)) {
+            return Container::getInstance();
+        }
+
+        return Container::getInstance()->make($abstract, $parameters);
     }
 }
 
@@ -39,7 +45,7 @@ if (!function_exists('app')) {
  */
 if (!function_exists('router')) {
     function router() {
-        return app()->getRouter();
+        return app('Framework\Http\Router');
     }
 }
 
@@ -52,7 +58,7 @@ if (!function_exists('router')) {
  */
 if (!function_exists('kernel')) {
     function kernel() {
-        return app()->getKernel();
+        return app('Framework\Http\Kernel');
     }
 }
 
@@ -78,7 +84,7 @@ if (!function_exists('request')) {
  */
 if (!function_exists('base_path')) {
     function base_path($path = '') {
-        return app()->getBasePath($path);
+        return app()->basePath($path);
     }
 }
 
@@ -109,6 +115,31 @@ if (!function_exists('load')) {
  */
 if (!function_exists('logger')) {
     function logger() {
-        return app()->getExceptionHandler(true);
+        return app('handler');
+    }
+}
+
+/**
+ * Helper Function: config
+ *
+ * Get or set configuration values.
+ *
+ * @param string|array|null $key     The configuration key or an array of key-value pairs to set.
+ * @param mixed            $default The default value to return if the key is not found (for get operations).
+ *
+ * @return mixed The configuration value or the config repository instance (for set operations).
+ */
+if (!function_exists('config')) {
+    function config($key = null, $default = null)
+    {
+        if (is_null($key)) {
+            return app('config');
+        }
+
+        if (is_array($key)) {
+            return app('config')->set($key);
+        }
+
+        return app('config')->get($key, $default);
     }
 }
