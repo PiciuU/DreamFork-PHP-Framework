@@ -2,7 +2,7 @@
 
 namespace Framework\Http;
 
-use Dotenv\Dotenv;
+use Framework\Bootstrap\LoadConfiguration;
 
 /**
  * Class Application
@@ -12,65 +12,76 @@ use Dotenv\Dotenv;
  *
  * @package Framework\Http
  */
-class Application
+class Application extends Container
 {
-    /**
-     * Application instance (Singleton).
-     *
-     * @var Application|null
-     */
-    private static $app;
-
-    /**
-     * Instance of the application's kernel.
-     *
-     * @var Kernel|null
-     */
-    private $kernel;
-
-    /**
-     * Instance of the application's router.
-     *
-     * @var Router|null
-     */
-    private $router;
+    use LoadConfiguration;
 
     /**
      * Base path of the application.
      *
      * @var string
      */
-    private $basePath;
+    protected $basePath;
 
     /**
-     * Instance of the exception handler.
+     * The custom bootstrap path defined by the developer.
      *
-     * @var Handler|null
+     * @var string
      */
-    private $handler;
+    protected $bootstrapPath;
 
     /**
-     * Instance of the exception handler logger.
+     * The custom application path defined by the developer.
      *
-     * @var Logger|null
+     * @var string
      */
-    private $logger;
+    protected $appPath;
+
+    /**
+     * The custom configuration path defined by the developer.
+     *
+     * @var string
+     */
+    protected $configPath;
+
+    /**
+     * The custom public / web path defined by the developer.
+     *
+     * @var string
+     */
+    protected $publicPath;
+
 
     /**
      * Application constructor.
      *
      * @param string $basePath The base path of the application.
      */
-    public function __construct($basePath)
+    public function __construct($basePath = null)
     {
-        if (!self::$app) {
-            self::$app = $this;
+        if ($basePath) {
+            $this->setBasePath($basePath);
         }
 
-        $this->basePath = $basePath;
+        $this->registerBaseBindings();
 
-        $this->setExceptionHandler();
-        $this->setEnvironmentVariables();
+        $this->bootstrap();
+
+        $this->registerExceptionHandler();
+    }
+
+    /**
+     * Register the basic bindings into the container.
+     *
+     * @return void
+     */
+    protected function registerBaseBindings()
+    {
+        static::setInstance($this);
+
+        $this->instance('app', $this);
+
+        $this->instance(Container::class, $this);
     }
 
     /**
@@ -89,127 +100,94 @@ class Application
     }
 
     /**
-     * Get the kernel instance.
+     * Join the given paths together.
      *
-     * @return Kernel The kernel instance.
-     * @throws \RuntimeException If the kernel instance does not exist yet.
+     * @param  string  $basePath
+     * @param  string  $path
+     * @return string
      */
-    public function getKernel()
+    public function joinPaths($basePath, $path = '')
     {
-        if (!$this->kernel) {
-            throw new \RuntimeException("Kernel instance does not exist yet.");
-        }
-
-        return $this->kernel;
-    }
-
-    /**
-     * Get the router instance.
-     *
-     * @return Router The router instance.
-     * @throws \RuntimeException If the router instance does not exist yet.
-     */
-    public function getRouter()
-    {
-        if (!$this->router) {
-            throw new \RuntimeException("Router instance does not exist yet.");
-        }
-
-        return $this->router;
-    }
-
-    /**
-     * Set the kernel instance.
-     *
-     * @param Kernel $kernel The kernel instance to set.
-     * @throws \RuntimeException If the kernel instance is already set.
-     */
-    public function setKernel(Kernel $kernel)
-    {
-        if ($this->kernel) {
-            throw new \RuntimeException("Kernel instance is already set.");
-        }
-
-        $this->kernel = $kernel;
-    }
-
-    /**
-     * Set the router instance.
-     *
-     * @param Router $router The router instance to set.
-     * @throws \RuntimeException If the router instance is already set.
-     */
-    public function setRouter(Router $router)
-    {
-        if ($this->router) {
-            throw new \RuntimeException("Router instance is already set.");
-        }
-
-        $this->router = $router;
+        return $basePath.($path != '' ? DIRECTORY_SEPARATOR.ltrim($path, DIRECTORY_SEPARATOR) : '');
     }
 
     /**
      * Get the base path of the application.
      *
-     * @return string The base path of the application.
+     * @param  string  $path
+     * @return string
      */
-    public function getBasePath($path = '') {
-        return $this->basePath.($path != '' ? DIRECTORY_SEPARATOR.ltrim($path, DIRECTORY_SEPARATOR) : '');
+    public function basePath($path = '')
+    {
+        return $this->joinPaths($this->basePath, $path);
     }
 
     /**
-     * Create an object based on the given class name.
+     * Set the base path for the application.
      *
-     * @param string $className The name of the class to create.
-     * @return object The created class object.
-     * @throws \InvalidArgumentException If the class does not exist.
+     * @param  string  $basePath
      */
-    public function make(string $className) {
-        if (!class_exists($className)) {
-            throw new \InvalidArgumentException("Class $className does not exist.");
-        }
+    public function setBasePath($basePath)
+    {
+        $this->basePath = rtrim($basePath, '\/');
 
-        $classObject = new $className();
-
-        if ($className === 'Framework\Http\Kernel') {
-            $this->setKernel($classObject);
-        }
-
-        return $classObject;
+        $this->bindPathsInContainer();
     }
 
     /**
-     * Loads environment variables from the application's .env file using the Dotenv library.
-     * This function is responsible for initializing and populating the application's environment
-     * with the configuration values specified in the .env file.
+     * Get the path to the application "app" directory.
      *
-     * @throws \RuntimeException If the .env file is not found or if there is an issue loading its contents.
+     * @param  string  $path
+     * @return string
      */
-    private function setEnvironmentVariables() {
-        if (!file_exists($this->basePath . '/.env')) {
-            throw new \RuntimeException('.env file not found.');
-        }
-
-        $dotenv = Dotenv::createImmutable($this->basePath);
-        $dotenv->load();
+    public function path($path = '')
+    {
+       return $this->joinPaths($this->appPath ?: $this->basePath('app'), $path);
     }
 
     /**
-     * Set the exception handler and logger instances.
-     */
-    private function setExceptionHandler() {
-        $this->handler = new \App\Exceptions\Handler();
-        $this->logger = $this->handler->getLogger();
-    }
-
-    /**
-     * Get the exception handler instance.
+     * Get the path to the application configuration files.
      *
-     * @param bool $deep Set to true to retrieve the logger instance.
-     * @return Handler|Logger The exception handler instance or logger instance if $deep is true.
+     * @param  string  $path
+     * @return string
      */
-    public function getExceptionHandler($deep = false) {
-        return $deep ? $this->logger : $this->handler;
+    public function configPath($path = '')
+    {
+        return $this->joinPaths($this->configPath ?: $this->basePath('config'), $path);
+    }
+
+    /**
+     * Get the path to the public / web directory.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function publicPath($path = '')
+    {
+        return $this->joinPaths($this->publicPath ?: $this->basePath('public'), $path);
+    }
+
+    /**
+     * Bind all of the application paths in the container.
+     *
+     * @return void
+     */
+    protected function bindPathsInContainer()
+    {
+        $this->instance('path', $this->path());
+        $this->instance('path.base', $this->basePath());
+        $this->instance('path.config', $this->configPath());
+        $this->instance('path.public', $this->publicPath());
+    }
+
+    /**
+     * Register the exception handler into the container.
+     *
+     * @return void
+     */
+    protected function registerExceptionHandler()
+    {
+        $this->instance('handler', new \App\Exceptions\Handler());
     }
 
 }

@@ -14,15 +14,8 @@ use Throwable;
  *
  * @package Framework\Exceptions
  */
-class ExceptionHandler {
-
-    /**
-     * The logger instance used for reporting exceptions.
-     *
-     * @var Logger
-     */
-    private $logger;
-
+class ExceptionHandler extends Logger
+{
     /**
      * Mapping of exception types to log levels.
      *
@@ -44,16 +37,6 @@ class ExceptionHandler {
      */
     public function __construct() {
         set_exception_handler([$this, 'register']);
-        $this->logger = new Logger();
-    }
-
-    /**
-     * Get the logger instance.
-     *
-     * @return Logger The logger instance.
-     */
-    public function getLogger() {
-        return $this->logger;
     }
 
     /**
@@ -120,9 +103,9 @@ class ExceptionHandler {
 
         $context = $this->buildExceptionContext($e);
 
-        method_exists($this->logger, $level)
-            ? $this->logger->{$level}($e->getMessage(), $context)
-            : $this->logger->log($level, $e->getMessage(), $context);
+        method_exists($this, $level)
+            ? $this->{$level}($e->getMessage(), $context)
+            : $this->log($level, $e->getMessage(), $context);
 
         // Add rendering engine for exceptions
     }

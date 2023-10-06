@@ -37,7 +37,7 @@ class Kernel
      * Initializes the Kernel instance and sets up the router.
      */
     public function __construct() {
-        app()->setRouter(new Router());
+        app()->make(Router::class);
     }
 
     /**
