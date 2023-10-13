@@ -22,6 +22,7 @@ class Kernel {
     public function run() {
         $commandName = $this->getCommandName();
         $commandNameFunction = $this->getCommandNameFunction();
+        $commandNameParameters = $this->getCommandNameParameters();
 
         $commandPath = __DIR__ . '/Commands/' . $commandName . '.php';
 
@@ -35,14 +36,22 @@ class Kernel {
 
                 if ($commandNameFunction) {
                     if (method_exists($commandInstance, $commandNameFunction)) {
-                        call_user_func([$commandInstance, $commandNameFunction]);
+                        if ($commandNameParameters !== null) {
+                            call_user_func([$commandInstance, $commandNameFunction], $commandNameParameters);
+                        } else {
+                            call_user_func([$commandInstance, $commandNameFunction]);
+                        }
                     }
                     else {
                         throw new \Exception("Function '$commandNameFunction' for command class '$commandName' does not exist.");
                     }
                 }
                 else {
-                    $commandInstance->execute();
+                    if ($commandNameParameters !== null) {
+                        $commandInstance->execute($commandNameParameters);
+                    } else {
+                        $commandInstance->execute();
+                    }
                 }
             } else {
                 throw new \Exception("Command class '$commandName' does not exist.");
@@ -75,11 +84,20 @@ class Kernel {
     }
 
     /**
+     * Get optional parameters for the command specified in the arguments.
+     *
+     * @return string|null The parameter for the command or null if not found.
+     */
+    public function getCommandNameParameters() {
+        return $this->arguments[1] ?? null;
+    }
+
+    /**
      * Handle exceptions by displaying an error message and exiting.
      *
-     * @param \Exception $e The exception to handle.
+     * @param \Throwable $e The exception to handle.
      */
-    public function handleException(\Exception $e) {
+    public function handleException(\Throwable $e) {
         echo "Error: " . $e->getMessage() . "\n";
         exit(1);
     }

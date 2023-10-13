@@ -51,6 +51,12 @@ class Application extends Container
      */
     protected $publicPath;
 
+    /**
+     * The custom storage path defined by the developer.
+     *
+     * @var string
+     */
+    protected $storagePath;
 
     /**
      * Application constructor.
@@ -67,7 +73,7 @@ class Application extends Container
 
         $this->bootstrap();
 
-        $this->registerExceptionHandler();
+        $this->registerCoreContainerAliases();
     }
 
     /**
@@ -82,6 +88,10 @@ class Application extends Container
         $this->instance('app', $this);
 
         $this->instance(Container::class, $this);
+
+        $this->instance('handler', new \App\Exceptions\Handler());
+
+        $this->singleton(\Framework\Filesystem\FilesystemManager::class);
     }
 
     /**
@@ -168,6 +178,17 @@ class Application extends Container
     }
 
     /**
+     * Get the path to the storage directory.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function storagePath($path = '')
+    {
+        return $this->joinPaths($this->storagePath ?: $this->basePath('storage'), $path);
+    }
+
+    /**
      * Bind all of the application paths in the container.
      *
      * @return void
@@ -178,16 +199,25 @@ class Application extends Container
         $this->instance('path.base', $this->basePath());
         $this->instance('path.config', $this->configPath());
         $this->instance('path.public', $this->publicPath());
+        $this->instance('path.storage', $this->storagePath());
     }
 
     /**
-     * Register the exception handler into the container.
+     * Register the core class aliases in the container.
      *
      * @return void
      */
-    protected function registerExceptionHandler()
+    public function registerCoreContainerAliases()
     {
-        $this->instance('handler', new \App\Exceptions\Handler());
+        foreach ([
+            'kernel' => [\Framework\Http\Kernel::class],
+            'router' => [\Framework\Http\Router::class],
+            'filesystem' => [\Framework\Filesystem\FilesystemManager::class],
+        ] as $key => $aliases) {
+            foreach ($aliases as $alias) {
+                $this->alias($key, $alias);
+            }
+        }
     }
 
 }

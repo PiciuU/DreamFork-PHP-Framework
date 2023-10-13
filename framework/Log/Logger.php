@@ -140,5 +140,7 @@ class Logger implements LoggerInterface {
 
         // Save log details to storage (W.I.P)
         print_r($details);
+
+        print_r($context);
     }
 }

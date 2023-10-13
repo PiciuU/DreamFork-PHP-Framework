@@ -124,7 +124,7 @@ abstract class Route
 
         $route->setMethods('POST');
 
-        self::$routes->add($name, $route);
+        self::$routes[self::$interface]->add($name, $route);
     }
 
     /**
@@ -140,7 +140,7 @@ abstract class Route
 
         $route->setMethods('PUT');
 
-        self::$routes->add($name, $route);
+        self::$routes[self::$interface]->add($name, $route);
     }
 
     /**
@@ -156,7 +156,7 @@ abstract class Route
 
         $route->setMethods('DELETE');
 
-        self::$routes->add($name, $route);
+        self::$routes[self::$interface]->add($name, $route);
     }
 
     /**
