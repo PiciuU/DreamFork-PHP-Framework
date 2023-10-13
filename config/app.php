@@ -60,6 +60,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application URL
+    |--------------------------------------------------------------------------
+    |
+    | This configuration defines the primary URL for your application. It plays a crucial role in
+    | generating links and resource access throughout the application. The value of `APP_URL` is used
+    | for creating full URLs, which is essential for generating links to various pages and resources.
+    | By default, it is set to "http://localhost," which is used in a local environment for development
+    | and testing. However, in a real production environment, you should set this URL to the publicly
+    | accessible server where your application runs, e.g., "https://my-application.com."
+    |
+    */
+
+    'url' => env('APP_URL', 'http://localhost'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

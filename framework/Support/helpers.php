@@ -45,7 +45,7 @@ if (!function_exists('app')) {
  */
 if (!function_exists('router')) {
     function router() {
-        return app('Framework\Http\Router');
+        return app('router');
     }
 }
 
@@ -58,7 +58,7 @@ if (!function_exists('router')) {
  */
 if (!function_exists('kernel')) {
     function kernel() {
-        return app('Framework\Http\Kernel');
+        return app('kernel');
     }
 }
 
@@ -141,5 +141,45 @@ if (!function_exists('config')) {
         }
 
         return app('config')->get($key, $default);
+    }
+}
+
+/**
+ * Get the path to the storage folder.
+ *
+ * @param  string  $path
+ * @return string
+ */
+if (!function_exists('storage_path')) {
+    function storage_path($path = '')
+    {
+        return app()->storagePath($path);
+    }
+}
+
+/**
+ * Throw the given exception if the given condition is true.
+ *
+ * @template TException of \Throwable
+ *
+ * @param  mixed  $condition
+ * @param  TException|class-string<TException>|string  $exception
+ * @param  mixed  ...$parameters
+ * @return mixed
+ *
+ * @throws TException
+ */
+if (!function_exists('throw_if')) {
+    function throw_if($condition, $exception = 'RuntimeException', ...$parameters)
+    {
+        if ($condition) {
+            if (is_string($exception) && class_exists($exception)) {
+                $exception = new $exception(...$parameters);
+            }
+
+            throw is_string($exception) ? new RuntimeException($exception) : $exception;
+        }
+
+        return $condition;
     }
 }

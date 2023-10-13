@@ -43,7 +43,7 @@ class Container {
      *
      * @var string[]
      */
-    protected $aliases = [];
+    public $aliases = [];
 
     /**
      * Set the shared instance of the container.
@@ -79,6 +79,18 @@ class Container {
         $this->instances[$abstract] = $instance;
 
         return $instance;
+    }
+
+    /**
+     * Register an alias for a binding.
+     *
+     * @param  string  $alias   The alias name.
+     * @param  string  $abstract   The abstract identifier.
+     * @return void
+     */
+    public function alias($alias, $abstract)
+    {
+        $this->aliases[$alias] = $abstract;
     }
 
     /**
@@ -152,8 +164,29 @@ class Container {
      */
     public function resolve($abstract, $parameters = [])
     {
+        if (isset($this->aliases[$abstract])) {
+            $abstract = $this->aliases[$abstract];
+        }
+
         if (isset($this->instances[$abstract])) {
             return $this->instances[$abstract];
+        }
+
+        if (isset($this->bindings[$abstract])) {
+            $concrete = $this->bindings[$abstract]['concrete'];
+            $shared = $this->bindings[$abstract]['shared'];
+
+            if ($concrete instanceof Closure) {
+                $object = $concrete($this, $parameters);
+            } else {
+                $object = $this->build($concrete);
+            }
+
+            if ($shared) {
+                $this->instances[$abstract] = $object;
+            }
+
+            return $object;
         }
 
         $object = $this->build($abstract);

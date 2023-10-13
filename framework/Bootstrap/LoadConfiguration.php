@@ -2,6 +2,7 @@
 
 namespace Framework\Bootstrap;
 
+use Symfony\Component\Finder\Finder;
 use Dotenv\Dotenv;
 use SplFileInfo;
 
@@ -82,7 +83,7 @@ trait LoadConfiguration
 
         $configPath = realpath($this->configPath());
 
-        foreach (\Symfony\Component\Finder\Finder::create()->files()->name('*.php')->in($configPath) as $file) {
+        foreach (Finder::create()->files()->name('*.php')->in($configPath) as $file) {
             $directory = $this->getNestedDirectory($file, $configPath);
 
             $files[$directory.basename($file->getRealPath(), '.php')] = $file->getRealPath();
