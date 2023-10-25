@@ -156,6 +156,41 @@ class Container {
     }
 
     /**
+     * Determine if the given abstract type has been bound.
+     *
+     * @param  string  $abstract The abstract identifier to check.
+     * @return bool
+     */
+    public function bound($abstract)
+    {
+        return isset($this->bindings[$abstract]) ||
+               isset($this->instances[$abstract]) ||
+               $this->isAlias($abstract);
+    }
+
+    /**
+     * Determine if a given string is an alias.
+     *
+     * @param  string  $name The alias name.
+     * @return bool
+     */
+    public function isAlias($name)
+    {
+        return isset($this->aliases[$name]);
+    }
+
+    /**
+     * Determine if the given abstract type has been bound.
+     *
+     * @param  string  $abstract The abstract identifier to check.
+     * @return bool
+     */
+    public function has(string $id): bool
+    {
+        return $this->bound($id);
+    }
+
+    /**
      * Resolve the given type from the container.
      *
      * @param  string|callable  $abstract   The abstract identifier or callable.

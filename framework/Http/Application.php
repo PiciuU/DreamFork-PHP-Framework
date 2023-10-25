@@ -17,6 +17,13 @@ class Application extends Container
     use LoadConfiguration;
 
     /**
+     * The Dreamfork framework version.
+     *
+     * @var string
+     */
+    const VERSION = '1.0.0';
+
+    /**
      * Base path of the application.
      *
      * @var string
@@ -74,6 +81,16 @@ class Application extends Container
         $this->bootstrap();
 
         $this->registerCoreContainerAliases();
+    }
+
+    /**
+     * Get the version number of the application.
+     *
+     * @return string
+     */
+    public function version()
+    {
+        return static::VERSION;
     }
 
     /**

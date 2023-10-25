@@ -2,9 +2,17 @@
 
 namespace Framework\Exceptions\Filesystem;
 
-class ResourceAlreadyExists extends \RuntimeException {
-    public function __construct($message = "Resource already exists.", $code = 0, Throwable $previous = null)
+class ResourceAlreadyExists extends \RuntimeException
+{
+    private $context = [];
+
+    public function __construct($message = "Resource already exists.", $context = [], $code = 0, Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
+        $this->context = $context;
+    }
+
+    public function context() {
+        return $this->context;
     }
 }
