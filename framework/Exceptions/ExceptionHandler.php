@@ -4,6 +4,7 @@ namespace Framework\Exceptions;
 
 use Framework\Log\Logger;
 use Framework\Log\LogLevel;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 /**
@@ -21,9 +22,7 @@ class ExceptionHandler extends Logger
      *
      * @var array
      */
-    private $levels = [
-        'Framework\Exceptions\Database\ConnectionError' => LogLevel::CRITICAL
-    ];
+    private $levels = [];
 
     /**
      * List of exceptions that should not be reported.
@@ -44,8 +43,19 @@ class ExceptionHandler extends Logger
      *
      * @param Throwable $e The exception to report.
      */
-    public function reportable($e) {
+    public function reportable($e)
+    {
         $this->report($e);
+    }
+
+    /**
+     * Log a Throwable exception.
+     *
+     * @param Throwable $e The exception to log.
+     */
+    public function loggable($e)
+    {
+        $this->logThrowable($e);
     }
 
     /**
@@ -83,11 +93,43 @@ class ExceptionHandler extends Logger
     }
 
     /**
-     * Report or log the given exception.
+     * Report and log a Throwable exception.
+     *
+     * This method is responsible for handling the given Throwable exception.
+     * It logs it using logThrowable method, sends an HTTP response with
+     * the appropriate status code and headers, and renders the exception for display.
      *
      * @param Throwable $e The exception to report or log.
      */
-    protected function reportThrowable(Throwable $e) {
+    protected function reportThrowable(Throwable $e)
+    {
+        $this->logThrowable($e);
+
+        $response = new Response(
+            null,
+            $this->getStatusCode($e),
+            $this->getHeaders($e)
+        );
+
+        $response->send();
+
+        $this->renderException($this->buildExceptionContext($e));
+
+        kernel()->terminate(request(), $response);
+    }
+
+    /**
+     * Log a Throwable exception.
+     *
+     * This method is responsible for determining the log level for the given Throwable exception,
+     * building the context for logging, and then logging the exception message with the associated
+     * log level. If the log level method does not exist in the class, it falls back to the generic
+     * log method.
+     *
+     * @param Throwable $e The exception to log.
+     */
+    protected function logThrowable(Throwable $e)
+    {
         $level = null;
 
         foreach ($this->levels as $type => $logLevel) {
@@ -104,10 +146,64 @@ class ExceptionHandler extends Logger
         $context = $this->buildExceptionContext($e);
 
         method_exists($this, $level)
-            ? $this->{$level}($e->getMessage(), $context)
-            : $this->log($level, $e->getMessage(), $context);
+        ? $this->{$level}($e->getMessage(), $context)
+        : $this->log($level, $e->getMessage(), $context);
+    }
 
-        // Add rendering engine for exceptions
+    /**
+     * Render an exception.
+     *
+     * @param array $context The exception to render.
+     */
+    protected function renderException(array $context)
+    {
+        try {
+            return config('app.debug')
+                        ? $this->renderExceptionWithDebugRenderer($context)
+                        : $this->renderExceptionWithSimpleRenderer($context['exception']);
+        } catch (Throwable $e) {
+            return $this->renderExceptionWithSimpleRenderer($e);
+        }
+    }
+
+    /**
+     * Render an exception using the debug renderer.
+     *
+     * @param array $context The exception to render.
+     */
+    protected function renderExceptionWithDebugRenderer(array $context)
+    {
+        return app(ExceptionRenderer::class)->renderDebug($context);
+    }
+
+    /**
+     * Render an exception using a simple renderer.
+     *
+     * @param Throwable $e The exception to render.
+     */
+    protected function renderExceptionWithSimpleRenderer(Throwable $e)
+    {
+        return app(ExceptionRenderer::class)->render($this->getStatusCode($e));
+    }
+
+    /**
+     * Get the HTTP status code for an exception.
+     *
+     * @param Throwable $e The exception to get the status code for.
+     * @return int The HTTP status code.
+     */
+    protected function getStatusCode(Throwable $e) {
+        return method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+    }
+
+    /**
+     * Get the HTTP headers for an exception.
+     *
+     * @param Throwable $e The exception to get the headers for.
+     * @return array The HTTP headers.
+     */
+    protected function getHeaders(Throwable $e) {
+        return method_exists($e, 'getHeaders') ? $e->getHeaders() : [];
     }
 
     /**
@@ -118,9 +214,9 @@ class ExceptionHandler extends Logger
      */
     protected function buildExceptionContext(Throwable $e) {
         return array_merge(
-            $this->exceptionContext($e),
-            $this->context(),
-            ['exception' => $e]
+            ['exception' => $e],
+            ['exception_context' => $this->exceptionContext($e)],
+            ['additional_context' => $this->context()]
         );
     }
 

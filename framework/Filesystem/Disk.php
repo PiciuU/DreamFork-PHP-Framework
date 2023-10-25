@@ -113,7 +113,7 @@ class Disk
     }
 
     /**
-     * Determine if Flysystem exceptions should be thrown.
+     * Determine if exceptions should be thrown.
      *
      * @return bool
      */
@@ -122,11 +122,20 @@ class Disk
         return (bool) ($this->throw ?? false);
     }
 
+    /**
+     * Log an exception if the log_exceptions flag is enabled and 'throw' flag is not set for the current disk.
+     *
+     * This method is responsible for logging exceptions when the 'log_exceptions' flag is enabled.
+     * If the 'throw' flag is set, it instead uses the `throw_if` method
+     * to conditionally log the exception based on the 'throwsExceptions' method.
+     *
+     * @param Throwable $exception The exception to log if conditions are met.
+     */
     protected function logExceptionIfEnabled($exception)
     {
-        if (!$this->log_exceptions) return;
+        if (!$this->log_exceptions || $this->throw) return;
 
-        print_r("Exception will be saved: ".$exception->getMessage());
+        logger()->loggable($exception);
     }
 
     /**
@@ -142,11 +151,11 @@ class Disk
     {
         $fullPath = $this->root."/".$path;
         if (!$this->isInsideScope($fullPath)) {
-            throw new ResourceOutsideScope('Access denied. Resource is outside the allowed scope.');
+            throw new ResourceOutsideScope('Access denied. Resource is outside the allowed scope.', ['resourcePath' => $fullPath]);
         }
 
         if ($mustExist && !$this->fs->exists($fullPath)) {
-            throw new ResourceNotFound('Resource not found');
+            throw new ResourceNotFound('Resource not found', ['resourcePath' => $fullPath]);
         }
 
         return $fullPath;
@@ -250,7 +259,7 @@ class Disk
         }
 
         if ($this->fs->exists($sourcePath)) {
-            $e = new ResourceAlreadyExists('Resource already exists.');
+            $e = new ResourceAlreadyExists('Resource already exists.', ['resourcePath' => $sourcePath]);
             $this->logExceptionIfEnabled($e);
             throw_if($this->throwsExceptions(), $e);
             return false;
@@ -304,7 +313,7 @@ class Disk
         }
 
         if ($this->fs->exists($destinationPath)) {
-            $e = new ResourceAlreadyExists('Resource already exists.');
+            $e = new ResourceAlreadyExists('Resource already exists.', ['resourcePath' => $destinationPath]);
             $this->logExceptionIfEnabled($e);
             throw_if($this->throwsExceptions(), $e);
             return false;
@@ -343,7 +352,7 @@ class Disk
         }
 
         if ($this->fs->exists($destinationPath)) {
-            $e = new ResourceAlreadyExists('Resource already exists.');
+            $e = new ResourceAlreadyExists('Resource already exists.', ['resourcePath' => $destinationPath]);
             $this->logExceptionIfEnabled($e);
             throw_if($this->throwsExceptions(), $e);
             return false;
@@ -420,7 +429,7 @@ class Disk
     public function storeTextFile($source, $content)
     {
         try {
-            $sourcePath = $this->checkAccessAndExistence($source, false);
+            $sourcePath = $this->checkAccessAndExistence($source.'.txt', false);
         } catch (ResourceNotFound|ResourceOutsideScope $e) {
             $this->logExceptionIfEnabled($e);
             throw_if($this->throwsExceptions(), $e);
@@ -429,7 +438,7 @@ class Disk
         }
 
         try {
-            $result = $this->fs->dumpFile($sourcePath.'.txt', $content);
+            $result = $this->fs->dumpFile($sourcePath, $content);
         } catch (IOException $e) {
             $this->logExceptionIfEnabled($e);
             throw_if($this->throwsExceptions(), $e);
@@ -449,10 +458,10 @@ class Disk
      * @return bool True on success, false on failure.
      * @throws \Error If access is denied, the file does not exist, or there's an error in writing the content.
      */
-    public function writeTextFile($source, $content, $newLine = true)
+    public function writeTextFile($source, $content, $writeAtBeginning = false, $newLine = true)
     {
         try {
-            $sourcePath = $this->checkAccessAndExistence($source, false);
+            $sourcePath = $this->checkAccessAndExistence($source.'.txt', false);
         } catch (ResourceNotFound|ResourceOutsideScope $e) {
             $this->logExceptionIfEnabled($e);
             throw_if($this->throwsExceptions(), $e);
@@ -460,13 +469,22 @@ class Disk
             return false;
         }
 
-        if ($newLine) $content = PHP_EOL . $content;
-
         try {
             if (!$this->fs->exists($sourcePath)) {
-                $result = $this->fs->dumpFile($sourcePath.'.txt', $content);
+                $result = $this->fs->dumpFile($sourcePath, $content);
             } else {
-                $result = $this->fs->appendToFile($sourcePath.'.txt', $content);
+                if ($writeAtBeginning) {
+                    $existingContent = file_get_contents($sourcePath);
+
+                    if ($newLine) $content = $content.PHP_EOL;
+
+                    $content = $content.$existingContent;
+
+                    $result = $this->fs->dumpFile($sourcePath, $content);
+                } else {
+                    if ($newLine) $content = PHP_EOL.$content;
+                    $result = $this->fs->appendToFile($sourcePath, $content);
+                }
             }
         } catch (IOException $e) {
             $this->logExceptionIfEnabled($e);
@@ -504,7 +522,7 @@ class Disk
         }
 
         if (!$overwrite && $this->fs->exists($sourcePath.$filename)) {
-            $e = new ResourceAlreadyExists('Resource already exists.');
+            $e = new ResourceAlreadyExists('Resource already exists.', ['resourcePath' => $sourcePath.$filename]);
             $this->logExceptionIfEnabled($e);
             throw_if($this->throwsExceptions(), $e);
             return false;

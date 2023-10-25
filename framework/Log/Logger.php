@@ -2,6 +2,8 @@
 
 namespace Framework\Log;
 
+use Framework\Support\Facades\Storage;
+
 /**
  * Class Logger
  *
@@ -129,18 +131,41 @@ class Logger implements LoggerInterface {
      */
     private function addRecord(string $level, string $message, array $context = [])
     {
-        // Get the current date and time
         $date = new \DateTime();
         $date = $date->format('Y-m-d H:i:s');
 
-        // Create log details
         $details = sprintf(
-            "%s - Level: %s - Message: %s - Context: %s", $date, $level, $message, json_encode($context)
-        ).PHP_EOL;
+            "[%s] Level: %s - Message: %s " . PHP_EOL . "Exception Content: %s, Additional Context: %s" . PHP_EOL . "[Backtrace] " . PHP_EOL . "%s",
+            $date,
+            $level,
+            $message,
+            isset($context['exception_context']) ? json_encode($context['exception_context'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : "[]",
+            isset($context['additional_context']) ? json_encode($context['additional_context'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : "[]",
+            $this->debug_backtrace_string($context['exception']->getTrace())
+        );
 
-        // Save log details to storage (W.I.P)
-        print_r($details);
+        Storage::disk('log')->writeTextFile("dreamfork.log", $details, true, true);
+    }
 
-        print_r($context);
+    /**
+     * Generate a stack trace as a string from the provided trace data.
+     *
+     * @param array $trace The trace data to be converted to a string.
+     * @return array The stack trace as a string.
+     */
+    private function debug_backtrace_string($trace) {
+        $stack = "";
+        $i = 1;
+
+        foreach($trace as $node) {
+            $entry = "#$i ".$node['file'] ."(" .$node['line']."): ";
+            if(isset($node['class'])) {
+                $entry .= $node['class']."->";
+            }
+            $entry .= $node['function']."()";
+            $stack .= $entry.PHP_EOL;
+            $i += 1;
+        }
+        return $stack;
     }
 }
