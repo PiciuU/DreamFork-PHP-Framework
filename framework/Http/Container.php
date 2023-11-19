@@ -185,9 +185,28 @@ class Container {
      * @param  string  $abstract The abstract identifier to check.
      * @return bool
      */
-    public function has(string $id): bool
+    public function has(string $abstract): bool
     {
-        return $this->bound($id);
+        return $this->bound($abstract);
+    }
+
+    /**
+     * Check if an instance of the specified abstract is registered in the container.
+     *
+     * This method determines whether an instance has been created and registered in the
+     * container for the given abstract identifier. It is useful for verifying if a particular
+     * dependency has already been resolved.
+     *
+     * @param string $abstract The abstract identifier to check for an existing instance.
+     * @return bool True if an instance for the abstract is registered, otherwise false.
+     */
+    public function isResolved(string $abstract) : bool
+    {
+        if (isset($this->aliases[$abstract])) {
+            $abstract = $this->aliases[$abstract];
+        }
+
+        return isset($this->instances[$abstract]);
     }
 
     /**

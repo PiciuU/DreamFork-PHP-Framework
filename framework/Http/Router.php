@@ -129,7 +129,8 @@ class Router
         } catch (NoConfigurationException $e) {
             return new Response('Configuration does not exists.', Response::HTTP_INTERNAL_SERVER_ERROR);
         } catch (\Exception $e) {
-            return new Response('Internal Server Error', Response::HTTP_INTERNAL_SERVER_ERROR);
+            throw $e;
+            // return new Response('Internal Server Error', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
