@@ -230,6 +230,7 @@ class Application extends Container
             'kernel' => [\Framework\Http\Kernel::class],
             'router' => [\Framework\Http\Router::class],
             'filesystem' => [\Framework\Filesystem\FilesystemManager::class],
+            'db' => [\Framework\Database\DatabaseManager::class],
         ] as $key => $aliases) {
             foreach ($aliases as $alias) {
                 $this->alias($key, $alias);

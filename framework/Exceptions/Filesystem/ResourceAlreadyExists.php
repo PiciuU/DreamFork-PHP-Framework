@@ -2,7 +2,10 @@
 
 namespace Framework\Exceptions\Filesystem;
 
-class ResourceAlreadyExists extends \RuntimeException
+use RuntimeException;
+use Throwable;
+
+class ResourceAlreadyExists extends RuntimeException
 {
     private $context = [];
 

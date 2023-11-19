@@ -2,7 +2,10 @@
 
 namespace Framework\Exceptions\Filesystem;
 
-class ResourceNotFound extends \RuntimeException
+use RuntimeException;
+use Throwable;
+
+class ResourceNotFound extends RuntimeException
 {
     private $context = [];
 

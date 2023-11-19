@@ -88,6 +88,8 @@ class Kernel
      */
     public function terminate(Request $request, Response $response)
     {
+        if (app()->isResolved('db')) app('db')->disconnect();
+
         $requestEndedAt = Carbon::now();
 
         $executionTimeInMilliseconds = $this->requestStartedAt->diffInMilliseconds($requestEndedAt);

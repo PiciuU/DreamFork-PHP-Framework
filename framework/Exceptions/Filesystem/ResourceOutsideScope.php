@@ -2,7 +2,10 @@
 
 namespace Framework\Exceptions\Filesystem;
 
-class ResourceOutsideScope extends \RuntimeException
+use RuntimeException;
+use Throwable;
+
+class ResourceOutsideScope extends RuntimeException
 {
     private $context = [];
 

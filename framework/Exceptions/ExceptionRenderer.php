@@ -72,7 +72,7 @@ class ExceptionRenderer
         $i = 1;
 
         foreach($trace as $node) {
-            $entry = "#$i ".$node['file'] ."(" .$node['line']."): ";
+            $entry = "#" . $i . (isset($node['file']) && isset($node['line']) ? " " . $node['file'] . "(" . $node['line'] . "): " : " ");
             if(isset($node['class'])) {
                 $entry .= $node['class']."->";
             }
