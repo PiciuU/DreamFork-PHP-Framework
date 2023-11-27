@@ -4,7 +4,6 @@ namespace Framework\Filesystem;
 
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Finder\Finder;
 
@@ -24,9 +23,9 @@ use Framework\Exceptions\Filesystem\ResourceAlreadyExists;
 class Disk
 {
     /**
-     * Symfony Filesystem object.
+     * Filesystem instance.
      *
-     * @var Filesystem
+     * @var \Framework\Filesystem\Filesystem
      */
     private $fs;
 
@@ -62,10 +61,10 @@ class Disk
     /**
      * Constructor for the class.
      *
-     * Initializes a new Disk instance with the provided properties and Symfony Filesystem object.
+     * Initializes a new Disk instance with the provided properties and Filesystem instance.
      *
      * @param array $properties An array of disk properties, including 'root', 'url', and 'throw'.
-     * @param Filesystem $fs Symfony Filesystem object used for file operations.
+     * @param \Framework\Filesystem\Filesystem $fs Filesystem instance used for file operations.
      */
     public function __construct($properties, Filesystem $fs)
     {
@@ -278,6 +277,35 @@ class Disk
     }
 
     /**
+     * Puts the given content into a file at the specified destination path.
+     *
+     * @param string $content The content to be stored in the file.
+     * @param string $destination The path where the file should be stored.
+     * @return bool True on success, false on failure.
+     * @throws \Error If access is denied or there's an error in storing the content.
+     */
+    public function put($content, $destination)
+    {
+        try {
+            $destinationPath = $this->checkAccessAndExistence($destination, false);
+        } catch (ResourceNotFound|ResourceOutsideScope $e) {
+            $this->logExceptionIfEnabled($e);
+            throw_if($this->throwsExceptions(), $e);
+
+            return false;
+        }
+
+        try {
+            $result = $this->fs->put($destinationPath, $content);
+        } catch (IOException $e) {
+            $this->logExceptionIfEnabled($e);
+            throw_if($this->throwsExceptions(), $e);
+
+            return false;
+        }
+    }
+
+    /**
      * Moves a file or directory to a new location.
      *
      * @param string $source The source path.
@@ -474,7 +502,7 @@ class Disk
                 $result = $this->fs->dumpFile($sourcePath, $content);
             } else {
                 if ($writeAtBeginning) {
-                    $existingContent = file_get_contents($sourcePath);
+                    $existingContent = $this->fs->get($sourcePath);
 
                     if ($newLine) $content = $content.PHP_EOL;
 
@@ -541,6 +569,20 @@ class Disk
     }
 
     /**
+     * Checks if a file or directory exists at the specified path within the allowed scope.
+     *
+     * @param string $source The path to check for existence.
+     * @return bool True if the file or directory exists, false otherwise.
+     * @throws \Error If access is denied.
+     */
+    public function exists($source)
+    {
+        $sourcePath = $this->checkAccessAndExistence($source, false);
+
+        return $this->fs->exists($sourcePath);
+    }
+
+    /**
      * Checks if a path points to a file.
      *
      * @param string $source The path to check.
@@ -551,7 +593,7 @@ class Disk
     {
         $sourcePath = $this->checkAccessAndExistence($source);
 
-        return is_file($sourcePath);
+        return $this->fs->isFile($sourcePath);
     }
 
     /**
@@ -565,7 +607,7 @@ class Disk
     {
         $sourcePath = $this->checkAccessAndExistence($source);
 
-        return is_dir($sourcePath);
+        return $this->fs->isDir($sourcePath);
     }
 
     /**
@@ -579,7 +621,7 @@ class Disk
     {
         $sourcePath = $this->checkAccessAndExistence($source);
 
-        return filesize($sourcePath);
+        return $this->fs->size($sourcePath);
     }
 
     /**
@@ -594,6 +636,20 @@ class Disk
         $sz = 'BKMGTP';
         $factor = floor((strlen($bytes) - 1) / 3);
         return sprintf("%.2f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+    }
+
+    /**
+     * Retrieves the last modified timestamp of a file or directory.
+     *
+     * @param string $source The path to the file or directory.
+     * @return int The Unix timestamp representing the last modification time.
+     * @throws \Error If access is denied or the file or directory does not exist.
+     */
+    public function lastModified($source)
+    {
+        $sourcePath = $this->checkAccessAndExistence($source);
+
+        return $this->fs->lastModified($sourcePath);
     }
 
     /**
