@@ -145,10 +145,12 @@ if (!function_exists('config')) {
 }
 
 /**
+ * Helper Function: storage_path
+ *
  * Get the path to the storage folder.
  *
- * @param  string  $path
- * @return string
+ * @param  string  $path The additional path within the storage folder.
+ * @return string The full path to the storage folder or a file within it.
  */
 if (!function_exists('storage_path')) {
     function storage_path($path = '')
@@ -158,14 +160,31 @@ if (!function_exists('storage_path')) {
 }
 
 /**
+ * Helper Function: resource_path
+ *
+ * Get the path to the resources folder.
+ *
+ * @param  string  $path The additional path within the resources folder.
+ * @return string The full path to the resources folder or a file within it.
+ */
+if (! function_exists('resource_path')) {
+    function resource_path($path = '')
+    {
+        return app()->resourcePath($path);
+    }
+}
+
+/**
+ * Helper Function: throw_if
+ *
  * Throw the given exception if the given condition is true.
  *
  * @template TException of \Throwable
  *
- * @param  mixed  $condition
- * @param  TException|class-string<TException>|string  $exception
- * @param  mixed  ...$parameters
- * @return mixed
+ * @param  mixed  $condition The condition to check.
+ * @param  TException|class-string<TException>|string  $exception The exception to throw if the condition is true.
+ * @param  mixed  ...$parameters Additional parameters for the exception constructor.
+ * @return mixed The condition value.
  *
  * @throws TException
  */
@@ -181,5 +200,61 @@ if (!function_exists('throw_if')) {
         }
 
         return $condition;
+    }
+}
+
+/**
+ * Helper Function: class_basename
+ *
+ * Get the class "basename" of the given object or class name.
+ *
+ * @param  string|object  $class The class name or an object.
+ * @return string The class basename.
+ */
+if (! function_exists('class_basename')) {
+    function class_basename($class)
+    {
+        $class = is_object($class) ? get_class($class) : $class;
+
+        return basename(str_replace('\\', '/', $class));
+    }
+}
+
+/**
+ * Helper Function: view
+ *
+ * Get the evaluated view contents for the given view.
+ *
+ * @param  string|null  $view The name of the view.
+ * @param  array  $data The data to pass to the view.
+ * @param  array  $mergeData Additional data to merge with the view data.
+ * @return \Framework\View\Factory|\Framework\View\View The evaluated view contents or the view factory instance.
+ */
+if (! function_exists('view')) {
+    function view($view = null, $data = [], $mergeData = [])
+    {
+        $factory = app('view');
+
+        if (func_num_args() === 0) {
+            return $factory;
+        }
+
+        return $factory->make($view, $data, $mergeData);
+    }
+}
+
+/**
+ * Helper Function: e
+ *
+ * Encode HTML special characters in a string.
+ *
+ * @param string|null  $value The string to encode.
+ * @param  bool  $doubleEncode Whether to double-encode existing entities.
+ * @return string The encoded string.
+ */
+if (! function_exists('e')) {
+    function e($value, $doubleEncode = true)
+    {
+        return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', $doubleEncode);
     }
 }

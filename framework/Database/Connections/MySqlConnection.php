@@ -48,6 +48,16 @@ class MySqlConnection extends Connection
     }
 
     /**
+     * Get the connection name.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return 'mysql';
+    }
+
+    /**
      * Get the default query grammar instance.
      *
      * @return \Framework\Database\Grammars\MySqlGrammar

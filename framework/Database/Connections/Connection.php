@@ -339,7 +339,7 @@ class Connection
      */
     public function getLastInsertId()
     {
-        return $this->getLastInsertId ?: null;
+        return $this->lastInsertId ?: null;
     }
 
     /**

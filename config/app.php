@@ -91,4 +91,16 @@ return [
     */
 
     'timezone' => 'UTC',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Locale Configuration
+    |--------------------------------------------------------------------------
+    |
+    | The application locale sets the default language for your application.
+    | Feel free to change this value to any supported locale in your project.
+    |
+    */
+
+    'locale' => 'en',
 ];
