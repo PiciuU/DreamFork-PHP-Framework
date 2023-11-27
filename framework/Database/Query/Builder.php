@@ -177,6 +177,16 @@ class Builder
     }
 
     /**
+     * Get the database connection instance.
+     *
+     * @return \Framework\Database\Connections\Connection
+     */
+    public function getConnection()
+    {
+        return $this->connection;
+    }
+
+    /**
      * Set the columns to be selected.
      *
      * @param  array|mixed  $columns

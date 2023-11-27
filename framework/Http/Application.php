@@ -108,7 +108,7 @@ class Application extends Container
 
         $this->instance('handler', new \App\Exceptions\Handler());
 
-        $this->singleton(\Framework\Filesystem\FilesystemManager::class);
+        // $this->singleton(\Framework\Filesystem\FilesystemManager::class);
     }
 
     /**
@@ -124,6 +124,16 @@ class Application extends Container
         }
 
         return self::$app;
+    }
+
+    /**
+     * Get the current application locale.
+     *
+     * @return string
+     */
+    public function getLocale()
+    {
+        return config('app.locale');
     }
 
     /**
@@ -206,6 +216,46 @@ class Application extends Container
     }
 
     /**
+     * Get the path to the resources directory.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function resourcePath($path = '')
+    {
+        return $this->joinPaths($this->basePath('resources'), $path);
+    }
+
+    /**
+     * Get the path to the views directory.
+     *
+     * This method returns the first configured path in the array of view paths.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function viewPath($path = '')
+    {
+        $viewPath = rtrim(config('view.paths')[0], DIRECTORY_SEPARATOR);
+
+        return $this->joinPaths($viewPath, $path);
+    }
+
+    /**
+     * Get the paths to the views directories.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    public function viewPaths($path = '')
+    {
+        foreach(config('view.paths') as $viewPath) {
+            $viewPaths[] = $this->joinPaths(rtrim($viewPath, DIRECTORY_SEPARATOR), $path);
+        }
+        return $viewPaths;
+    }
+
+    /**
      * Bind all of the application paths in the container.
      *
      * @return void
@@ -216,6 +266,7 @@ class Application extends Container
         $this->instance('path.base', $this->basePath());
         $this->instance('path.config', $this->configPath());
         $this->instance('path.public', $this->publicPath());
+        $this->instance('path.resources', $this->resourcePath());
         $this->instance('path.storage', $this->storagePath());
     }
 
@@ -231,6 +282,7 @@ class Application extends Container
             'router' => [\Framework\Http\Router::class],
             'filesystem' => [\Framework\Filesystem\FilesystemManager::class],
             'db' => [\Framework\Database\DatabaseManager::class],
+            'view' => [\Framework\View\Factory::class],
         ] as $key => $aliases) {
             foreach ($aliases as $alias) {
                 $this->alias($key, $alias);

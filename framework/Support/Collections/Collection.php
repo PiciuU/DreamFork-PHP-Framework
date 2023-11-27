@@ -89,6 +89,16 @@ class Collection
     }
 
     /**
+     * Check if the collection is not empty.
+     *
+     * @return bool True if the collection is not empty, false otherwise.
+     */
+    public function isNotEmpty()
+    {
+        return !empty($this->items);
+    }
+
+    /**
      * Get an item from the collection by key.
      *
      * @param mixed $key The key of the item.
@@ -127,6 +137,21 @@ class Collection
     }
 
     /**
+     * Run a filter over each of the items.
+     *
+     * @param  (callable(TValue, TKey): bool)|null  $callback
+     * @return static
+     */
+    public function filter(callable $callback = null)
+    {
+        if ($callback) {
+            return new static(Arr::where($this->items, $callback));
+        }
+
+        return new static(array_filter($this->items));
+    }
+
+    /**
      * Get the first item from the collection.
      *
      * @param callable|null $callback A callback for filtering the items.
@@ -136,6 +161,30 @@ class Collection
     public function first(callable $callback = null, $default = null)
     {
         return Arr::first($this->items, $callback, $default);
+    }
+
+    /**
+     * Get the keys of the collection items.
+     *
+     * @return static<int, TKey>
+     */
+    public function keys()
+    {
+        return new static(array_keys($this->items));
+    }
+
+    /**
+     * Get the last item from the collection.
+     *
+     * @template TLastDefault
+     *
+     * @param  (callable(TValue, TKey): bool)|null  $callback
+     * @param  TLastDefault|(\Closure(): TLastDefault)  $default
+     * @return TValue|TLastDefault
+     */
+    public function last(callable $callback = null, $default = null)
+    {
+        return Arr::last($this->items, $callback, $default);
     }
 
     /**

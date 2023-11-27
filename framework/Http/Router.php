@@ -4,8 +4,12 @@ namespace Framework\Http;
 
 use App\Providers\RouteServiceProvider;
 
+use Framework\Database\ORM\Collection;
+use Framework\Database\ORM\Model;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -142,13 +146,19 @@ class Router
      */
     private function prepareResponse($response): Response
     {
-        if (!$response instanceof Response) {
+        if ($response instanceof Model) {
+            $response = new JsonResponse($response->toArray());
+        }
+        else if ($response instanceof Collection) {
+            $response = new JsonResponse($response->collectionToArray());
+        }
+        else if (!$response instanceof Response) {
             $response = new Response($response);
         }
 
-        if ($this->requestedInterface['name'] == 'api') {
-            $response->headers->set('Content-Type', 'application/json');
-        }
+        // if ($this->requestedInterface['name'] == 'api') {
+        //     $response->headers->set('Content-Type', 'application/json');
+        // }
 
         return $response;
     }
