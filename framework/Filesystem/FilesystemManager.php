@@ -2,8 +2,6 @@
 
 namespace Framework\Filesystem;
 
-use Symfony\Component\Filesystem\Filesystem;
-
 /**
  * Class FilesystemManager
  *
