@@ -211,7 +211,7 @@ if (!function_exists('throw_if')) {
  * @param  string|object  $class The class name or an object.
  * @return string The class basename.
  */
-if (! function_exists('class_basename')) {
+if (!function_exists('class_basename')) {
     function class_basename($class)
     {
         $class = is_object($class) ? get_class($class) : $class;
@@ -230,7 +230,7 @@ if (! function_exists('class_basename')) {
  * @param  array  $mergeData Additional data to merge with the view data.
  * @return \Framework\View\Factory|\Framework\View\View The evaluated view contents or the view factory instance.
  */
-if (! function_exists('view')) {
+if (!function_exists('view')) {
     function view($view = null, $data = [], $mergeData = [])
     {
         $factory = app('view');
@@ -252,9 +252,46 @@ if (! function_exists('view')) {
  * @param  bool  $doubleEncode Whether to double-encode existing entities.
  * @return string The encoded string.
  */
-if (! function_exists('e')) {
+if (!function_exists('e')) {
     function e($value, $doubleEncode = true)
     {
         return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', $doubleEncode);
+    }
+}
+
+/**
+ * Helper Function: asset
+ *
+ * Generate an asset path for the application.
+ *
+ * @param  string  $path The path to the asset.
+ * @param  bool|null  $secure Whether the asset should be secure (HTTPS).
+ * @return string The generated asset path.
+ */
+if (!function_exists('asset')) {
+    function asset($path, $secure = null)
+    {
+        return app('url')->asset($path, $secure);
+    }
+}
+
+/**
+ * Helper Function: url
+ *
+ * Generate a url for the application.
+ *
+ * @param  string|null  $path
+ * @param  mixed  $parameters
+ * @param  bool|null  $secure
+ * @return \Framework\Services\URL\UrlGenerator|string
+ */
+if (!function_exists('url')) {
+    function url($path = null, $parameters = [], $secure = null)
+    {
+        if (is_null($path)) {
+            return app('url');
+        }
+
+        return app('url')->to($path, $parameters, $secure);
     }
 }

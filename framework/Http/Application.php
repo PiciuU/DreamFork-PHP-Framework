@@ -282,6 +282,7 @@ class Application extends Container
             'router' => [\Framework\Http\Router::class],
             'filesystem' => [\Framework\Filesystem\FilesystemManager::class],
             'db' => [\Framework\Database\DatabaseManager::class],
+            'url' => [\Framework\Services\URL\UrlGenerator::class],
             'view' => [\Framework\View\Factory::class],
         ] as $key => $aliases) {
             foreach ($aliases as $alias) {
