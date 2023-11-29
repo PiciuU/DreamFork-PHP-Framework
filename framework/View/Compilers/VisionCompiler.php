@@ -12,7 +12,8 @@ namespace Framework\View\Compilers;
  */
 class VisionCompiler extends Compiler
 {
-    use Traits\CompileEchos,
+    use Traits\CompileResources,
+        Traits\CompileEchos,
         Traits\CompileIfs,
         Traits\CompileForeachs;
 
@@ -86,6 +87,7 @@ class VisionCompiler extends Compiler
      */
     public function compileContent($content)
     {
+        $content = $this->compileResources($content);
         $content = $this->compileRegularEchos($content);
         $content = $this->compileIfs($content);
         $content = $this->compileForeachs($content);
