@@ -15,6 +15,6 @@ use Framework\Http\Route as Route;
 |
 */
 
-Route::get('hello-web', '/', function() {
-    return 'Hello WEB!';
+Route::get('index', '/', function() {
+    return view('welcome');
 });
