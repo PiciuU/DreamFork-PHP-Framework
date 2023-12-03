@@ -67,7 +67,7 @@ if (!function_exists('kernel')) {
  *
  * Get the current HTTP request instance from the application.
  *
- * @return Symfony\Component\HttpFoundation\Request The current HTTP request instance.
+ * @return Framework\Http\Request The current HTTP request instance.
  */
 if (!function_exists('request')) {
     function request() {
@@ -80,7 +80,7 @@ if (!function_exists('request')) {
  *
  * Get the current HTTP request instance from the application.
  *
- * @return Symfony\Component\HttpFoundation\Request The current HTTP request instance.
+ * @return Framework\Http\Request The current HTTP request instance.
  */
 if (!function_exists('base_path')) {
     function base_path($path = '') {

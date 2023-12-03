@@ -2,8 +2,9 @@
 
 namespace Framework\Http;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Framework\Http\Request;
+use Framework\Http\Response;
+use Framework\Http\JsonResponse;
 
 use Carbon\Carbon;
 
@@ -27,7 +28,7 @@ class Kernel
     /**
      * The current HTTP request instance.
      *
-     * @var Symfony\Component\HttpFoundation\Request|null
+     * @var Framework\Http\Request|null
      */
     private $request;
 
@@ -43,7 +44,7 @@ class Kernel
     /**
      * Get the current HTTP request instance.
      *
-     * @return Symfony\Component\HttpFoundation\Request|null The current HTTP request instance.
+     * @return Framework\Http\Request|null The current HTTP request instance.
      */
     public function getRequest() {
         return $this->request;
@@ -52,8 +53,8 @@ class Kernel
     /**
      * Handle the incoming HTTP request.
      *
-     * @param Symfony\Component\HttpFoundation\Request $request The incoming HTTP request.
-     * @return Symfony\Component\HttpFoundation\Response The HTTP response.
+     * @param Framework\Http\Request $request The incoming HTTP request.
+     * @return Framework\Http\Response The HTTP response.
      */
     public function handle(Request $request)
     {
@@ -73,7 +74,7 @@ class Kernel
     /**
      * Dispatch the HTTP request to the router for processing.
      *
-     * @param Symfony\Component\HttpFoundation\Request $request The incoming HTTP request.
+     * @param Framework\Http\Request $request The incoming HTTP request.
      * @return mixed The response returned by the router.
      */
     protected function dispatchToRouter($request) {
@@ -83,10 +84,10 @@ class Kernel
     /**
      * Terminate the request and send the HTTP response.
      *
-     * @param Symfony\Component\HttpFoundation\Request $request The incoming HTTP request.
-     * @param Symfony\Component\HttpFoundation\Response $response The HTTP response.
+     * @param Framework\Http\Request $request The incoming HTTP request.
+     * @param Framework\Http\Response|Framework\Http\JsonResponse $response The HTTP response.
      */
-    public function terminate(Request $request, Response $response)
+    public function terminate(Request $request, Response|JsonResponse $response)
     {
         if (app()->isResolved('db')) app('db')->disconnect();
 

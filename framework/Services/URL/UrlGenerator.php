@@ -17,7 +17,7 @@ class UrlGenerator
     /**
      * The request instance.
      *
-     * @var \Symfony\Component\HttpFoundation\Request
+     * @var \Framework\Http\Request
      */
     protected $request;
 

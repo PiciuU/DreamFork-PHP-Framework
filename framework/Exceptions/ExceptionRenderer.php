@@ -16,49 +16,43 @@ use Throwable;
 class ExceptionRenderer
 {
     /**
-     * Render a simple error page for the given HTTP status code.
+     * Render a simple error page with a basic status message.
      *
      * @param int $code The HTTP status code.
+     * @return \Framework\View\View The rendered view.
      */
     public function render($code = 500)
     {
-        $resourcePath = __DIR__.'/resources/';
-        $filePath = $resourcePath.'simpleErrorPage.php';
+        $data = [
+            'message' => $this->getHttpStatusMessage($code),
+            'code' => $code
+        ];
 
-        $message = $this->getHttpStatusMessage($code);
-
-        require $filePath;
+        return view('exceptions\exception_basic', $data);
     }
 
     /**
-     * Render a detailed error page for the given exception.
+     * Render a detailed error page with information about the exception, request details, and application context.
      *
-     * @param array $context The exception and its context to render.
+     * @param array $context The context information for the exception.
+     * @return \Framework\View\View The rendered view.
      */
     public function renderDebug(array $context)
     {
-        $request = request();
-
         $data = [
             'exception' => $context['exception'],
             'exception_context' => array_merge($context['exception_context'], $context['additional_context']),
-            'request' => $request,
+            'request' => request(),
             'context' => [
                 'php_version' => phpversion(),
                 'framework_version' => app()->version(),
                 'app_debug' => config('app.debug'),
                 'app_env' => config('app.env'),
             ],
+            'trace' => $this->debug_backtrace_string($context['exception']->getTrace())
         ];
 
-        $resourcePath = __DIR__.'/resources/';
-        $filePath = $resourcePath.'debugErrorPage.php';
-
-        extract($data);
-
-        $trace = $this->debug_backtrace_string($exception->getTrace());
-
-        require $filePath;
+        return view('exceptions\exception_debug', $data);
     }
 
     /**
