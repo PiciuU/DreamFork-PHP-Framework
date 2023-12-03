@@ -3,14 +3,14 @@
 namespace Framework\Http;
 
 /**
- * Class ServiceProvider
+ * Class RouteServiceProvider
  *
  * This class is responsible for managing the available interfaces and loading routes for the application.
  * It filters enabled interfaces, registers them in the route collection, and loads corresponding route files.
  *
  * @package Framework\Http
  */
-class ServiceProvider
+class RouteServiceProvider
 {
     /**
      * An array containing information about available interfaces.
@@ -27,11 +27,12 @@ class ServiceProvider
     private array $loadedRoutes;
 
     /**
-     * Constructor for the ServiceProvider class.
+     * Constructor for the RouteServiceProvider class.
      *
      * @param array $availableInterfaces An array containing information about available interfaces.
      */
-    public function __construct(Array $availableInterfaces) {
+    public function __construct(Array $availableInterfaces)
+    {
         $this->availableInterfaces = $availableInterfaces;
 
         // Filter enabled interfaces
@@ -56,7 +57,8 @@ class ServiceProvider
      *
      * @return array The loaded routes.
      */
-    public function getRoutes(): array {
+    public function getRoutes(): array
+    {
         return $this->loadedRoutes;
     }
 
@@ -67,6 +69,7 @@ class ServiceProvider
      * @return array An array containing the matching interface name and prefix.
      */
     public function getRequestedInterface($request): array {
+
         $pathInfo = $request->getPathInfo();
 
         $matchingInterface = null;
@@ -75,10 +78,34 @@ class ServiceProvider
             if ($interfaceData['enabled'] && strpos($pathInfo, $interfaceData['prefix'].'/') === 0) {
                 $matchingInterface['name'] = $interfaceName;
                 $matchingInterface['prefix'] = $interfaceData['prefix'];
+                $matchingInterface['request-headers'] = $interfaceData['request-headers'];
+                $matchingInterface['response-headers'] = $interfaceData['response-headers'];
                 break;
             }
         }
 
         return $matchingInterface;
+    }
+
+    /**
+     * Get the request headers for the requested interface.
+     *
+     * @param mixed $request The incoming request object.
+     * @return array The request headers for the requested interface.
+     */
+    public function getRequestHeaders($request): array
+    {
+        return $this->getRequestedInterface($request)['request-headers'];
+    }
+
+    /**
+     * Get the response headers for the requested interface.
+     *
+     * @param mixed $response The incoming response object.
+     * @return array The response headers for the requested interface.
+     */
+    public function getResponseHeaders($response): array
+    {
+        return $this->getRequestedInterface($response)['response-headers'];
     }
 }

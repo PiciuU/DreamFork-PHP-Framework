@@ -7,9 +7,6 @@ use App\Providers\RouteServiceProvider;
 use Framework\Database\ORM\Collection;
 use Framework\Database\ORM\Model;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -63,9 +60,9 @@ class Router
      * Handles incoming requests and invokes the appropriate route.
      *
      * @param Request $request HTTP request.
-     * @return Response HTTP response.
+     * @return \Framework\Http\RequestResponse|\Framework\Http\JsonResponse HTTP response.
      */
-    public function dispatch(Request $request): Response
+    public function dispatch(Request $request): Response|JsonResponse
     {
         $this->requestedInterface = $this->provider->getRequestedInterface($request);
         $response = $this->runRoute($request, $this->routes[$this->requestedInterface['name']]);
@@ -73,7 +70,7 @@ class Router
     }
 
     /**
-     * Invokes the route and handles exceptions, generating the appropriate HTTP responses.
+     * Invokes the route and handles exceptions, especially setting the request headers for used interface, generating the appropriate HTTP responses,.
      *
      * @param Request $request HTTP request.
      * @param RouteCollection $routes Collection of routes for the interface.
@@ -81,6 +78,10 @@ class Router
      */
     private function runRoute(Request $request, RouteCollection $routes): mixed
     {
+        foreach($this->requestedInterface['request-headers'] as $key => $value) {
+            $request->headers->set($key, $value);
+        }
+
         $context = new RequestContext();
         $context->fromRequest($request);
 
@@ -139,12 +140,12 @@ class Router
     }
 
     /**
-     * Prepares the HTTP response by adding headers, especially setting the content type to "application/json" for the "api" interface.
+     * Prepares the HTTP response by adding headers, especially setting the response headers for used interface.
      *
      * @param mixed $response Route response.
-     * @return Response HTTP response.
+     * @return \Framework\Http\Response|\Framework\Http\JsonResponse HTTP response.
      */
-    private function prepareResponse($response): Response
+    private function prepareResponse($response): Response|JsonResponse
     {
         if ($response instanceof Model) {
             $response = new JsonResponse($response->toArray());
@@ -156,9 +157,9 @@ class Router
             $response = new Response($response);
         }
 
-        // if ($this->requestedInterface['name'] == 'api') {
-        //     $response->headers->set('Content-Type', 'application/json');
-        // }
+        foreach($this->requestedInterface['response-headers'] as $key => $value) {
+            $response->headers->set($key, $value);
+        }
 
         return $response;
     }

@@ -4,7 +4,12 @@ namespace Framework\Exceptions;
 
 use Framework\Log\Logger;
 use Framework\Log\LogLevel;
-use Symfony\Component\HttpFoundation\Response;
+use Framework\Services\Validator\Exceptions\ValidationFailed;
+use Framework\Http\Response;
+use Framework\Http\JsonResponse;
+
+use Framework\Support\Arr;
+
 use Throwable;
 
 /**
@@ -105,17 +110,133 @@ class ExceptionHandler extends Logger
     {
         $this->logThrowable($e);
 
-        $response = new Response(
-            null,
-            $this->getStatusCode($e),
-            $this->getHeaders($e)
-        );
+        $response = match (true) {
+            $e instanceof ValidationFailed => $this->convertValidationExceptionToResponse($e),
+            default => $this->renderExceptionResponse($e),
+        };
 
         $response->send();
 
-        $this->renderException($this->buildExceptionContext($e));
-
         kernel()->terminate(request(), $response);
+    }
+
+    /**
+     * Render an exception response.
+     *
+     * @param Throwable $e The exception to render.
+     * @return Response The HTTP response.
+     */
+    protected function renderExceptionResponse(Throwable $e)
+    {
+        return $this->shouldReturnJson($e)
+            ? $this->prepareJsonResponse($e)
+            : $this->prepareResponse($e);
+    }
+
+    /**
+     * Prepare a JSON response for the exception.
+     *
+     * @param Throwable $e The exception to prepare JSON response for.
+     * @return JsonResponse The JSON response.
+     */
+    protected function prepareJsonResponse(Throwable $e)
+    {
+        return new JsonResponse(
+            $this->convertExceptionToArray($e),
+            $this->getStatusCode($e),
+            $this->getHeaders($e),
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+        );
+    }
+
+    /**
+     * Convert the exception to an array for JSON response.
+     *
+     * @param Throwable $e The exception to convert.
+     * @return array The array representation of the exception.
+     */
+    protected function convertExceptionToArray(Throwable $e)
+    {
+        return config('app.debug') ? [
+            'message' => $e->getMessage(),
+            'exception' => get_class($e),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => collect($e->getTrace())->map(fn ($trace) => Arr::except($trace, ['args']))->all(),
+        ] : [
+            'message' => $e->getMessage() ?? 'Server Error',
+        ];
+    }
+
+    /**
+     * Prepare an HTML response for the exception.
+     *
+     * @param Throwable $e The exception to prepare HTML response for.
+     * @return Response The HTML response.
+     */
+    protected function prepareResponse(Throwable $e)
+    {
+        return new Response($this->renderException($this->buildExceptionContext($e)), $this->getStatusCode($e), $this->getHeaders($e));
+    }
+
+    /**
+     * Convert a validation exception to a response.
+     *
+     * @param ValidationFailed $e The validation exception to convert.
+     * @return JsonResponse|Response The converted response.
+     */
+    protected function convertValidationExceptionToResponse(ValidationFailed $e)
+    {
+        if ($e->response) {
+            return $e->response;
+        }
+
+        return $this->shouldReturnJson($e)
+                    ? $this->invalidJson($e)
+                    : $this->invalid($e);
+    }
+
+    /**
+     * Prepare a JSON response for a validation exception.
+     *
+     * @param ValidationFailed $exception The validation exception to prepare JSON response for.
+     * @return JsonResponse The JSON response.
+     */
+    protected function invalidJson(ValidationFailed $exception)
+    {
+        return new JsonResponse([
+            'message' => $exception->getMessage(),
+            'errors' => $exception->errors(),
+        ], $exception->status);
+    }
+
+    /**
+     * Prepare a non-JSON response for a validation exception.
+     *
+     * @param ValidationFailed $exception The validation exception to prepare non-JSON response for.
+     * @return void
+     */
+    protected function invalid(ValidationFailed $exception)
+    {
+        /*
+         * Note: This section needs improvement in the future by implementing a comprehensive system
+         * for redirects with detailed error information. Presently, the validation process redirects
+         * to the default front page instead of redirecting back to the last visited page with an attached
+         * error bag for a more user-friendly experience.
+        */
+        $redirect = request()->headers->get('referer') ?? url()->to('/');
+        return header("Location: ".$redirect);
+    }
+
+    /**
+     * Check if the response should be JSON.
+     *
+     * @param Throwable $e The exception to check.
+     * @return bool True if the response should be JSON, otherwise false.
+     */
+    protected function shouldReturnJson(Throwable $e)
+    {
+        return request()->expectsJson();
     }
 
     /**

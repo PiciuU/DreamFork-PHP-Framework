@@ -24,7 +24,7 @@ class ValidationFailed extends Exception
     /**
      * The recommended response to send to the client.
      *
-     * @var \Symfony\Component\HttpFoundation\Response|null
+     * @var \Framework\Http\Response|null
      */
     public $response;
 
@@ -39,7 +39,7 @@ class ValidationFailed extends Exception
      * ValidationFailed constructor.
      *
      * @param \Framework\Services\Validator\Validator $validator The validator instance.
-     * @param \Symfony\Component\HttpFoundation\Response|null $response The recommended response to send to the client.
+     * @param \Framework\Http\Response|null $response The recommended response to send to the client.
      */
     public function __construct($validator, $response = null)
     {
@@ -100,7 +100,7 @@ class ValidationFailed extends Exception
     /**
      * Get the recommended response to send to the client.
      *
-     * @return \Symfony\Component\HttpFoundation\Response|null The recommended response.
+     * @return \Framework\Http\Response|null The recommended response.
      */
     public function getResponse()
     {

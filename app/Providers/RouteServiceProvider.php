@@ -4,14 +4,12 @@ namespace App\Providers;
 
 use Framework\Http\Route as Route;
 use Framework\Http\Application;
-use Framework\Http\ServiceProvider;
-
-use Symfony\Component\HttpFoundation\Request;
+use Framework\Http\RouteServiceProvider as ServiceProvider;
 
 /**
  * Class RouteServiceProvider
  *
- * This class extends the base ServiceProvider and is responsible for configuring and loading routes based on
+ * This class extends the base RouteServiceProvider and is responsible for configuring and loading routes based on
  * available interfaces. It defines which interfaces are enabled, their prefixes, and loads corresponding routes.
  *
  * @package App\Providers
@@ -27,10 +25,18 @@ class RouteServiceProvider extends ServiceProvider
         'api' => [
             'enabled' => true,
             'prefix' => '/api',
+            'request-headers' => [
+                // 'Accept' => 'application/json',
+            ],
+            'response-headers' => [
+                // 'Content-Type' => 'application/json'
+            ]
         ],
         'web' => [
             'enabled' => true,
-            'prefix' => ''
+            'prefix' => '',
+            'request-headers' => [],
+            'response-headers' => []
         ]
     ];
 
