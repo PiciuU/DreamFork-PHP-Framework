@@ -295,3 +295,27 @@ if (!function_exists('url')) {
         return app('url')->to($path, $parameters, $secure);
     }
 }
+
+/**
+ * Helper Function: validator
+ *
+ * Create a new Validator instance.
+ *
+ * @param  array  $data
+ * @param  array  $rules
+ * @param  array  $messages
+ * @param  array  $attributes
+ * @return \Framework\Services\Validator\Validator
+ */
+if (!function_exists('validator')) {
+    function validator(array $data = [], array $rules = [], array $messages = [], array $attributes = [])
+    {
+        $factory = app('validator');
+
+        if (func_num_args() === 0) {
+            return $factory;
+        }
+
+        return $factory->make($data, $rules, $messages, $attributes);
+    }
+}
