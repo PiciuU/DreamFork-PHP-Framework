@@ -231,4 +231,8 @@ class Collection
         return ! is_string($value) && is_callable($value);
     }
 
+    public function toArray()
+    {
+        return $this->map(fn ($value) => $value)->all();
+    }
 }

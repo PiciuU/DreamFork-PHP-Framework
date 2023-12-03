@@ -283,6 +283,7 @@ class Application extends Container
             'filesystem' => [\Framework\Filesystem\FilesystemManager::class],
             'db' => [\Framework\Database\DatabaseManager::class],
             'url' => [\Framework\Services\URL\UrlGenerator::class],
+            'validator' => [\Framework\Services\Validator\Factory::class],
             'view' => [\Framework\View\Factory::class],
         ] as $key => $aliases) {
             foreach ($aliases as $alias) {
