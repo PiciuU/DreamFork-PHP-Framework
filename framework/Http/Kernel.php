@@ -2,10 +2,6 @@
 
 namespace Framework\Http;
 
-use Framework\Http\Request;
-use Framework\Http\Response;
-use Framework\Http\JsonResponse;
-
 use Carbon\Carbon;
 
 /**
@@ -18,6 +14,20 @@ use Carbon\Carbon;
  */
 class Kernel
 {
+    /**
+     * The application implementation.
+     *
+     * @var \Framework\Http\Application
+     */
+    protected $app;
+
+    /**
+     * The router instance.
+     *
+     * @var \Framework\Http\Router
+     */
+    protected $router;
+
     /**
      * The timestamp when the current request started.
      *
@@ -38,7 +48,9 @@ class Kernel
      * Initializes the Kernel instance and sets up the router.
      */
     public function __construct() {
-        app()->make(Router::class);
+        $this->app = app();
+
+        $this->router = $this->app->make(Router::class);
     }
 
     /**
@@ -61,14 +73,27 @@ class Kernel
         $this->requestStartedAt = Carbon::now();
         $this->request = $request;
 
+        $this->bootstrap();
+
         try {
             $response = $this->dispatchToRouter($this->request);
         }
         catch (Throwable $e) {
-            echo "<br>CRITICAL ERROR: $e<br>";
+            throw $e;
         }
 
         return $response;
+    }
+
+    /**
+     * Bootstrap the application if it hasn't been bootstrapped yet.
+     *
+     */
+    public function bootstrap()
+    {
+        if (!$this->app->hasBeenBootstrapped()) {
+            $this->app->bootstrapApplication();
+        }
     }
 
     /**
@@ -78,7 +103,7 @@ class Kernel
      * @return mixed The response returned by the router.
      */
     protected function dispatchToRouter($request) {
-        return router()->dispatch($request);
+        return $this->router->dispatch($request);
     }
 
     /**
@@ -89,7 +114,7 @@ class Kernel
      */
     public function terminate(Request $request, Response|JsonResponse $response)
     {
-        if (app()->isResolved('db')) app('db')->disconnect();
+        if ($this->app->isResolved('db')) app('db')->disconnect();
 
         $requestEndedAt = Carbon::now();
 

@@ -2,6 +2,7 @@
 
 namespace Framework\Bootstrap;
 
+use Framework\Support\Env;
 use Symfony\Component\Finder\Finder;
 use Dotenv\Dotenv;
 use SplFileInfo;
@@ -43,9 +44,7 @@ trait LoadConfiguration
             throw new \RuntimeException('.env file not found.');
         }
 
-        // Create an immutable Dotenv instance and load environment variables.
-        $dotenv = Dotenv::createImmutable($this->basePath);
-        $dotenv->load();
+        Dotenv::create(Env::getRepository(), $this->basePath, '.env')->safeLoad();
     }
 
     /**

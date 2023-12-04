@@ -31,6 +31,13 @@ class Application extends Container
     protected $basePath;
 
     /**
+     * Indicates if the application has been bootstrapped before.
+     *
+     * @var bool
+     */
+    protected $hasBeenBootstrapped = false;
+
+    /**
      * The custom bootstrap path defined by the developer.
      *
      * @var string
@@ -78,9 +85,29 @@ class Application extends Container
 
         $this->registerBaseBindings();
 
-        $this->bootstrap();
-
         $this->registerCoreContainerAliases();
+    }
+
+    /**
+     * Determine if the application has been bootstrapped before.
+     *
+     * @return bool
+     */
+    public function hasBeenBootstrapped()
+    {
+        return $this->hasBeenBootstrapped;
+    }
+
+    /**
+     * Run the bootstrap for application.
+     *
+     * @return void
+     */
+    public function bootstrapApplication()
+    {
+        $this->hasBeenBootstrapped = true;
+
+        $this->bootstrap();
     }
 
     /**
@@ -107,8 +134,6 @@ class Application extends Container
         $this->instance(Container::class, $this);
 
         $this->instance('handler', new \App\Exceptions\Handler());
-
-        // $this->singleton(\Framework\Filesystem\FilesystemManager::class);
     }
 
     /**
