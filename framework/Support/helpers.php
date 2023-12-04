@@ -2,6 +2,8 @@
 
 use Framework\Http\Container;
 
+use Framework\Support\Env;
+
 /**
  * Helper Function: env
  *
@@ -15,7 +17,7 @@ use Framework\Http\Container;
 if (!function_exists('env')) {
     function env($key, $default = null)
     {
-        return $_ENV[$key] ?? $default;
+        return Env::get($key, $default);
     }
 }
 
