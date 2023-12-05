@@ -113,7 +113,7 @@ class Storage
      * @param string $scope The allowed scope path (root).
      * @return bool True if the path is within the scope, false otherwise.
      */
-    private function isInsideScope($path, $scope)
+    private function isInsideScope($path, $scope) : bool
     {
         $realPath = $this->getAbsoluteFilePath($path);
         $realScope = realpath($scope);
@@ -127,7 +127,8 @@ class Storage
      * @param string $path The path to convert.
      * @return string The absolute path after conversion.
      */
-    private function getAbsoluteFilePath($path) {
+    private function getAbsoluteFilePath($path) : string
+    {
         $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
         $parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), 'strlen');
         $absolutes = [];
