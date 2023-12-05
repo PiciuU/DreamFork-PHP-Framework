@@ -306,6 +306,7 @@ class Application extends Container
             'kernel' => [\Framework\Http\Kernel::class],
             'router' => [\Framework\Http\Router::class],
             'filesystem' => [\Framework\Filesystem\FilesystemManager::class],
+            'hash' => [\Framework\Services\Hash\HashManager::class],
             'db' => [\Framework\Database\DatabaseManager::class],
             'url' => [\Framework\Services\URL\UrlGenerator::class],
             'validator' => [\Framework\Services\Validator\Factory::class],
