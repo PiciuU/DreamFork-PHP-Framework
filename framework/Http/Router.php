@@ -151,7 +151,7 @@ class Router
             $response = new JsonResponse($response->toArray());
         }
         else if ($response instanceof Collection) {
-            $response = new JsonResponse($response->collectionToArray());
+            $response = new JsonResponse($response->toArray());
         }
         else if (!$response instanceof Response) {
             $response = new Response($response);

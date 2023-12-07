@@ -94,7 +94,7 @@ class Factory
      */
     protected function parseData($data)
     {
-        return $data instanceof Collection ? $data->collectionToArray() : $data;
+        return $data instanceof Collection ? $data->toArray() : $data;
     }
 
     /**

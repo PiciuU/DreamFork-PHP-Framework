@@ -19,7 +19,7 @@ class Collection extends BaseCollection
      *
      * @return array
      */
-    public function collectionToArray()
+    public function toArray()
     {
         return $this->map(function ($item) {
             return $item->toArray();

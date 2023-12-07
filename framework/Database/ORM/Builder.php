@@ -105,12 +105,46 @@ class Builder
         {
             $models = $this->hydrate($result->all());
 
-            if ($models->count() === 0) return null;
-            else if ($models->count() === 1) return $this->getModel()->newCollection($models->all())->first();
-            else return $this->getModel()->newCollection($models->all());
+            return $models;
         }
 
-        return $result;
+        return $this;
+    }
+
+    /**
+     * Check if any records exist in the result set.
+     *
+     * @return bool True if records exist; otherwise, false.
+     */
+    public function exists()
+    {
+        return $this->query->exists();
+    }
+
+    /**
+     * Execute the query and return the first result or null if no results are found.
+     *
+     * @param mixed ...$parameters Additional parameters for the query execution.
+     * @return \Framework\Database\ORM\Model|null The first result or null if no results are found.
+     */
+    public function first(...$parameters)
+    {
+        $result = $this->handleCall('first', $parameters);
+
+        return $result->first();
+    }
+
+    /**
+     * Execute the query and return the first result or null if no results are found.
+     *
+     * @param mixed ...$parameters Additional parameters for the query execution.
+     * @return \Framework\Database\ORM\Model|null The first result or null if no results are found.
+     */
+    public function find(...$parameters)
+    {
+        $result = $this->handleCall('find', $parameters);
+
+        return $result->first();
     }
 
     /**
