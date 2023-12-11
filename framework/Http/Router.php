@@ -52,8 +52,7 @@ class Router
      */
     public function __construct()
     {
-        $this->provider = new RouteServiceProvider();
-        $this->routes = $this->provider->getRoutes();
+
     }
 
     /**
@@ -64,6 +63,11 @@ class Router
      */
     public function dispatch(Request $request): Response|JsonResponse
     {
+        if (!$this->provider) {
+            $this->provider = new RouteServiceProvider();
+            $this->routes = $this->provider->getRoutes();
+        }
+
         $this->requestedInterface = $this->provider->getRequestedInterface($request);
         $response = $this->runRoute($request, $this->routes[$this->requestedInterface['name']]);
         return $this->prepareResponse($response);

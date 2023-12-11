@@ -12,8 +12,10 @@ use Framework\Support\Arr;
  *
  * @package Framework\Support\Collections
  */
-class Collection
+class Collection implements \Iterator
 {
+    use CollectionIterator;
+
     /**
      * The items contained in the collection.
      *

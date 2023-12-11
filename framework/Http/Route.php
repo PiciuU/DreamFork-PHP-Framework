@@ -5,6 +5,8 @@ namespace Framework\Http;
 use Symfony\Component\Routing\Route as SymfonyRoute;
 use Symfony\Component\Routing\RouteCollection;
 
+use Framework\Services\Auth\Middleware\Authenticate;
+
 /**
  * Class Route
  *
@@ -172,6 +174,18 @@ abstract class Route
         $route = self::prepareRoute('/{any}', $handler);
 
         self::$routes[self::$interface]->add('fallback', $route);
+    }
+
+    /**
+     * Apply authentication middleware to the route.
+     *
+     * @param mixed $next The next middleware or handler.
+     */
+    public static function guard($next)
+    {
+        if (!Authenticate::handle($next)) return;
+
+        $next();
     }
 
 }
