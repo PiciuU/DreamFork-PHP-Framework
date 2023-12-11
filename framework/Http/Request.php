@@ -2,6 +2,7 @@
 
 namespace Framework\Http;
 
+use Framework\Support\Facades\Auth;
 use Framework\Support\Arr;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
@@ -62,6 +63,16 @@ class Request extends SymfonyRequest
     public function validate(array $rules, array $messages = [], array $attributes = [])
     {
         return validator($this->all(), $rules, $messages, $attributes)->validate();
+    }
+
+    /**
+     * Get the authenticated user associated with the request.
+     *
+     * @return mixed|null The authenticated user instance.
+     */
+    public function user()
+    {
+        return Auth::user();
     }
 
     /**

@@ -303,6 +303,7 @@ class Application extends Container
     public function registerCoreContainerAliases()
     {
         foreach ([
+            'auth' => [\Framework\Services\Auth\AuthManager::class],
             'kernel' => [\Framework\Http\Kernel::class],
             'router' => [\Framework\Http\Router::class],
             'filesystem' => [\Framework\Filesystem\FilesystemManager::class],
