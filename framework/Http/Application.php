@@ -305,7 +305,8 @@ class Application extends Container
         foreach ([
             'auth' => [\Framework\Services\Auth\AuthManager::class],
             'kernel' => [\Framework\Http\Kernel::class],
-            'router' => [\Framework\Http\Router::class],
+            'route' => [\Framework\Http\Router::class],
+            'response' => [\Framework\Http\Routing\ResponseFactory::class],
             'filesystem' => [\Framework\Filesystem\FilesystemManager::class],
             'hash' => [\Framework\Services\Hash\HashManager::class],
             'db' => [\Framework\Database\DatabaseManager::class],

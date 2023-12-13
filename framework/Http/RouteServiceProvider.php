@@ -2,6 +2,8 @@
 
 namespace Framework\Http;
 
+use Framework\Support\Facades\Route;
+
 /**
  * Class RouteServiceProvider
  *
@@ -24,7 +26,7 @@ class RouteServiceProvider
      *
      * @var array
      */
-    private array $loadedRoutes;
+    // private array $loadedRoutes;
 
     /**
      * Constructor for the RouteServiceProvider class.
@@ -40,26 +42,10 @@ class RouteServiceProvider
             return $interfaceData['enabled'] === true;
         });
 
-        // Register enabled interfaces in the route collection and load route files
-        Route::collection(array_keys($enabledInterfaces));
-
         foreach ($enabledInterfaces as $interfaceName => $interfaceData) {
-            Route::interface($interfaceName, $interfaceData['prefix']);
+            Route::updateGroupStack($interfaceData);
             load(base_path("routes/$interfaceName.php"));
         }
-
-        // Store the loaded routes
-        $this->loadedRoutes = Route::getRoutes();
-    }
-
-    /**
-     * Get the loaded routes.
-     *
-     * @return array The loaded routes.
-     */
-    public function getRoutes(): array
-    {
-        return $this->loadedRoutes;
     }
 
     /**

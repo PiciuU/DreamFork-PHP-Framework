@@ -47,7 +47,7 @@ if (!function_exists('app')) {
  */
 if (!function_exists('router')) {
     function router() {
-        return app('router');
+        return app('route');
     }
 }
 
@@ -319,5 +319,26 @@ if (!function_exists('validator')) {
         }
 
         return $factory->make($data, $rules, $messages, $attributes);
+    }
+}
+
+/**
+ * Return a new response from the application.
+ *
+ * @param  \Framework\View\View|string|array|null  $content
+ * @param  int  $status
+ * @param  array  $headers
+ * @return \Framework\Http\Routing\ResponseFactory|Framework\Http\Response|Framework\Http\JsonResponse;
+ */
+if (!function_exists('response')) {
+    function response($content = '', $status = 200, array $headers = [])
+    {
+        $factory = app('response');
+
+        if (func_num_args() === 0) {
+            return $factory;
+        }
+
+        return $factory->make($content, $status, $headers);
     }
 }
