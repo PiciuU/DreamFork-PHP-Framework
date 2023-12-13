@@ -313,8 +313,14 @@ class ExceptionHandler extends Logger
      * @param Throwable $e The exception to get the status code for.
      * @return int The HTTP status code.
      */
-    protected function getStatusCode(Throwable $e) {
-        return method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+    protected function getStatusCode(Throwable $e)
+    {
+        $code = null;
+
+        if (method_exists($e, 'getStatusCode')) $code = $e->getStatusCode();
+        elseif (method_exists($e, 'getCode')) $code = $e->getCode();
+
+        return $code !== null && $code != '0' ? $code : 500;
     }
 
     /**

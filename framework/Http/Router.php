@@ -4,11 +4,21 @@ namespace Framework\Http;
 
 use App\Providers\RouteServiceProvider;
 
-use Framework\Database\ORM\Collection;
+use Framework\Http\Routing\RouteCollection;
+
+use Framework\Services\Auth\Middleware\Authenticate;
+
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+
+use Framework\Support\Collections\Collection;
 use Framework\Database\ORM\Model;
 
+use ArrayObject;
+use JsonSerializable;
+use stdClass;
+use Exception;
+
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
@@ -26,6 +36,8 @@ use Symfony\Component\Routing\Exception\NoConfigurationException;
  */
 class Router
 {
+    use Routing\AddRoutes;
+
     /**
      * The provider responsible for managing routes and interfaces.
      *
@@ -52,7 +64,7 @@ class Router
      */
     public function __construct()
     {
-
+        $this->routes = new RouteCollection();
     }
 
     /**
@@ -65,12 +77,11 @@ class Router
     {
         if (!$this->provider) {
             $this->provider = new RouteServiceProvider();
-            $this->routes = $this->provider->getRoutes();
         }
 
         $this->requestedInterface = $this->provider->getRequestedInterface($request);
-        $response = $this->runRoute($request, $this->routes[$this->requestedInterface['name']]);
-        return $this->prepareResponse($response);
+        $response = $this->runRoute($request, $this->routes);
+        return $this->prepareResponse($request, $response);
     }
 
     /**
@@ -80,7 +91,7 @@ class Router
      * @param RouteCollection $routes Collection of routes for the interface.
      * @return mixed Generated response based on content of requested route.
      */
-    private function runRoute(Request $request, RouteCollection $routes): mixed
+    private function runRoute(Request $request, $routes): mixed
     {
         foreach($this->requestedInterface['request-headers'] as $key => $value) {
             $request->headers->set($key, $value);
@@ -89,10 +100,18 @@ class Router
         $context = new RequestContext();
         $context->fromRequest($request);
 
-        $matcher = new UrlMatcher($routes, $context);
+        $matcher = new UrlMatcher($routes->toSymfonyRouteCollection(), $context);
 
         try {
             $matcher = $matcher->match($request->getPathInfo());
+
+            if ($routes->getRouteByName($matcher['_route'])->isGuarded()) {
+                try {
+                    Authenticate::authenticate();
+                } catch(\Exception $e) {
+                    return new JsonResponse(['message' => $e->getMessage()], $e->getCode());
+                }
+            }
 
             array_walk($matcher, function(&$param) {
                 if(is_numeric($param)) {
@@ -116,7 +135,7 @@ class Router
                 $classInstance = new $className();
 
                 if (!method_exists($classInstance, $matcher['method'])) {
-                    throw new \Exception('Method does not exist');
+                    throw new Exception("Method ".get_class($classInstance)."::{$matcher['method']} does not exist.", Response::HTTP_INTERNAL_SERVER_ERROR);
                 }
 
                 $reflection = new \ReflectionMethod($classInstance, $matcher['method']);
@@ -126,20 +145,19 @@ class Router
                 $response = call_user_func_array([$classInstance, $matcher['method']], $params);
             }
             else {
-                throw new \Exception('Invalid route handler');
+                throw new Exception('Invalid route handler', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
             return $response;
 
         } catch (MethodNotAllowedException $e) {
-            return new Response('Route method is not allowed.', Response::HTTP_METHOD_NOT_ALLOWED);
+            throw new Exception("The {$request->getMethod()} method is not supported for route {$request->getPathInfo()}.", Response::HTTP_METHOD_NOT_ALLOWED);
         } catch (ResourceNotFoundException $e) {
-            return new Response('Route does not exist.', Response::HTTP_NOT_FOUND);
+            throw new Exception("The route {$request->getPathInfo()} could not be found.", Response::HTTP_NOT_FOUND);
         } catch (NoConfigurationException $e) {
-            return new Response('Configuration does not exists.', Response::HTTP_INTERNAL_SERVER_ERROR);
-        } catch (\Exception $e) {
+            throw new Exception("Configuration does not exist.", Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (Exception $e) {
             throw $e;
-            // return new Response('Internal Server Error', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -149,23 +167,23 @@ class Router
      * @param mixed $response Route response.
      * @return \Framework\Http\Response|\Framework\Http\JsonResponse HTTP response.
      */
-    private function prepareResponse($response): Response|JsonResponse
+    private function prepareResponse($request, $response): Response|JsonResponse
     {
-        if ($response instanceof Model) {
+        if ($response instanceof Model || $response instanceof Collection) {
             $response = new JsonResponse($response->toArray());
         }
-        else if ($response instanceof Collection) {
-            $response = new JsonResponse($response->toArray());
+        else if (is_array($response) || $response instanceof stdClass || $response instanceof JsonSerializable || $response instanceof ArrayObject ) {
+            $response = new JsonResponse($response);
         }
-        else if (!$response instanceof Response) {
-            $response = new Response($response);
+        else if (!$response instanceof SymfonyResponse) {
+            $response = new Response($response, 200, ['Content-Type' => 'text/html']);
         }
 
         foreach($this->requestedInterface['response-headers'] as $key => $value) {
             $response->headers->set($key, $value);
         }
 
-        return $response;
+        return $response->prepare($request);
     }
 
     /**

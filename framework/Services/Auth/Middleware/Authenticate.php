@@ -2,7 +2,6 @@
 
 namespace Framework\Services\Auth\Middleware;
 
-use Framework\Support\Facades\Auth;
 use Framework\Services\Auth\Exceptions\AuthenticationException;
 
 use Closure;
@@ -10,21 +9,30 @@ use Closure;
 /**
  * Class Authenticate
  *
- * The Authenticate class is a middleware responsible for authenticating incoming requests.
- * It checks if the user is authenticated using the specified guard and throws an AuthenticationException if authentication fails.
+ * The Authenticate class provides a middleware for authentication checks based on configured guards.
+ * It allows specifying an array of guards to check, and it throws an AuthenticationException if none of the guards pass.
  *
  * @package Framework\Services\Auth\Middleware
  */
-class Authenticate
+abstract class Authenticate
 {
     /**
-     * Handle an incoming request.
+     * Perform authentication check for the specified guards.
      *
-     * @param  Closure  $next The next middleware in the pipeline.
-     * @return mixed Returns the result of the next middleware or throws an AuthenticationException.
+     * @param array|null $guards The array of guard names to check. Defaults to all configured guards if not provided.
+     * @throws AuthenticationException If none of the specified guards pass, an AuthenticationException is thrown.
+     * @return void
      */
-    public static function handle(Closure $next)
+    public static function authenticate($guards = null)
     {
-        return Auth::guard('api')->check();
+        if (empty($guards)) $guards = array_keys(config('auth.guards'));
+
+        foreach($guards as $guard) {
+            if (app('auth')->guard($guard)->check()) {
+                return app('auth')->shouldUse($guard);
+            }
+        }
+
+        throw new AuthenticationException('Unauthenticated.');
     }
 }

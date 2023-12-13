@@ -102,6 +102,31 @@ class AuthManager
     }
 
     /**
+     * Set the default guard driver the factory should serve.
+     *
+     * @param  string  $name
+     * @return void
+     */
+    public function shouldUse($name)
+    {
+        $name = $name ?: $this->getDefaultDriver();
+
+        $this->setDefaultDriver($name);
+    }
+
+    /**
+     * Set the default authentication driver name.
+     *
+     * @param  string  $name
+     * @return void
+     */
+    public function setDefaultDriver($name)
+    {
+        config()->set('auth.defaults.guard', $name);
+    }
+
+
+    /**
      * Get the default guard driver.
      *
      * @return string The default guard driver name.
