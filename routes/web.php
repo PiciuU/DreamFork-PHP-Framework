@@ -1,6 +1,6 @@
 <?php
 
-use Framework\Http\Route as Route;
+use Framework\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +15,6 @@ use Framework\Http\Route as Route;
 |
 */
 
-Route::get('index', '/', function() {
+Route::get('/', function() {
     return view('welcome');
 });

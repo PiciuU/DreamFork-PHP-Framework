@@ -1,6 +1,6 @@
 <?php
 
-use Framework\Http\Route as Route;
+use Framework\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +14,6 @@ use Framework\Http\Route as Route;
 |
 */
 
-Route::get('hello-api', '/hello', function() {
-    return 'Hello API!';
+Route::get('/hello', function() {
+    return response()->json(['message' => 'Hello API!'], 200);
 });

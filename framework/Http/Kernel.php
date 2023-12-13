@@ -120,10 +120,6 @@ class Kernel
 
         $executionTimeInMilliseconds = $this->requestStartedAt->diffInMilliseconds($requestEndedAt);
 
-        $response->setContent(json_encode([
-            'execution_time' => $executionTimeInMilliseconds." ms"
-        ]))->send();
-
         exit;
     }
 }
