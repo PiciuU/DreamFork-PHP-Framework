@@ -20,16 +20,16 @@ trait CompileIfs
     protected function compileIfs($content)
     {
         $patterns = [
-            '/@if\s?\(\s*(.+?)\s*\)/' => '<?php if(%s): ?>',
-            '/@elseif\s?\(\s*(.+?)\s*\)/' => '<?php elseif(%s): ?>',
+            '/@if\s?\(\s*(.+?)\s*\)(\r\n?|\n)/' => '<?php if(%s): ?>',
+            '/@elseif\s?\(\s*(.+?)\s*\)(\r\n?|\n)/' => '<?php elseif(%s): ?>',
             '/@else/' => '<?php else: ?>',
             '/@endif/' => '<?php endif; ?>',
         ];
 
         foreach ($patterns as $pattern => $replacement) {
             $callback = function ($matches) use ($replacement) {
-                $whitespace = empty($matches[3]) ? '' : $matches[3] . $matches[3];
                 $wrapped = $matches[1] ?? '';
+                $whitespace = empty($matches[2]) ? '' : $matches[2];
                 return sprintf($replacement, $wrapped) . $whitespace;
             };
 

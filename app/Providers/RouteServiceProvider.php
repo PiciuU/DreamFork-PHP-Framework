@@ -26,10 +26,10 @@ class RouteServiceProvider extends ServiceProvider
             'enabled' => true,
             'prefix' => '/api',
             'request-headers' => [
-                // 'Accept' => 'application/json',
+                'Accept' => 'application/json',
             ],
             'response-headers' => [
-                // 'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json'
             ]
         ],
         'web' => [

@@ -27,7 +27,8 @@ return [
     | Supported Options:
     | - root: The root directory for the disk.
     | - url: The URL for generating file URLs or paths (optional).
-    | - throw: A flag indicating whether to throw exceptions on errors (optional).
+    | - log_exceptions: A flag indicating whether to log exceptions (optional, default false).
+    | - throw: A flag indicating whether to throw exceptions on errors (optional, default false).
     |
     */
 

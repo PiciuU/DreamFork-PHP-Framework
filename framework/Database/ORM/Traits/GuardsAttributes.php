@@ -124,7 +124,9 @@ trait GuardsAttributes
      */
     protected function fillableFromArray(array $attributes)
     {
-        if (count($this->getFillable()) > 0) {
+        if ($this->guarded === false) {
+            return $attributes;
+        } else if (count($this->getFillable()) > 0) {
             return array_intersect_key($attributes, array_flip($this->getFillable()));
         } else {
             return [];

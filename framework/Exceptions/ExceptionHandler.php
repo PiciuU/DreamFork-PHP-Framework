@@ -9,6 +9,7 @@ use Framework\Http\Response;
 use Framework\Http\JsonResponse;
 
 use Framework\Support\Arr;
+use Framework\Support\Facades\Auth;
 
 use Throwable;
 
@@ -27,7 +28,7 @@ class ExceptionHandler extends Logger
      *
      * @var array
      */
-    private $levels = [];
+    protected $levels = [];
 
     /**
      * List of exceptions that should not be reported.

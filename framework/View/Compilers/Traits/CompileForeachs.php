@@ -20,14 +20,14 @@ trait CompileForeachs
     protected function compileForeachs($content)
     {
         $patterns = [
-            '/@foreach\s?\(\s*(.+?)\s*\)/' => '<?php foreach(%s): ?>',
+            '/@foreach\s?\(\s*(.+?)\s*\)(\r\n?|\n)/' => '<?php foreach(%s): ?>',
             '/@endforeach/' => '<?php endforeach; ?>',
         ];
 
         foreach ($patterns as $pattern => $replacement) {
             $callback = function ($matches) use ($replacement) {
-                $whitespace = empty($matches[3]) ? '' : $matches[3] . $matches[3];
                 $wrapped = $matches[1] ?? '';
+                $whitespace = empty($matches[2]) ? '' : $matches[2];
                 return sprintf($replacement, $wrapped) . $whitespace;
             };
 

@@ -2,6 +2,9 @@
 
 namespace Framework\Support\Collections;
 
+use ArrayAccess;
+use JsonSerializable;
+
 use Framework\Support\Arr;
 
 /**
@@ -12,7 +15,7 @@ use Framework\Support\Arr;
  *
  * @package Framework\Support\Collections
  */
-class Collection implements \Iterator
+class Collection implements \Iterator, ArrayAccess, JsonSerializable
 {
     use CollectionIterator;
 
@@ -233,8 +236,83 @@ class Collection implements \Iterator
         return ! is_string($value) && is_callable($value);
     }
 
+    /**
+     * Convert collection to an array.
+     *
+     * @return array An array of all items from collection
+     */
     public function toArray()
     {
         return $this->map(fn ($value) => $value)->all();
     }
+
+        /**
+     * Determine if an item exists at an offset.
+     *
+     * @param  TKey  $key
+     * @return bool
+     */
+    public function offsetExists($key): bool
+    {
+        return isset($this->items[$key]);
+    }
+
+    /**
+     * Get an item at a given offset.
+     *
+     * @param  TKey  $key
+     * @return TValue
+     */
+    public function offsetGet($key): mixed
+    {
+        return $this->items[$key];
+    }
+
+    /**
+     * Set the item at a given offset.
+     *
+     * @param  TKey|null  $key
+     * @param  TValue  $value
+     * @return void
+     */
+    public function offsetSet($key, $value): void
+    {
+        if (is_null($key)) {
+            $this->items[] = $value;
+        } else {
+            $this->items[$key] = $value;
+        }
+    }
+
+    /**
+     * Unset the item at a given offset.
+     *
+     * @param  TKey  $key
+     * @return void
+     */
+    public function offsetUnset($key): void
+    {
+        unset($this->items[$key]);
+    }
+
+    /**
+     * Convert the object into something JSON serializable.
+     *
+     * @return array<TKey, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return array_map(function ($value) {
+            if ($value instanceof JsonSerializable) {
+                return $value->jsonSerialize();
+            } elseif ($value instanceof Jsonable) {
+                return json_decode($value->toJson(), true);
+            } elseif ($value instanceof Arrayable) {
+                return $value->toArray();
+            }
+
+            return $value;
+        }, $this->all());
+    }
+
 }

@@ -11,6 +11,7 @@ use Framework\Exceptions\Filesystem\ResourceNotFound;
 use Framework\Exceptions\Filesystem\ResourceOutsideScope;
 use Framework\Exceptions\Filesystem\ResourceAlreadyExists;
 
+use Exception;
 
 /**
  * Class Disk
@@ -279,12 +280,12 @@ class Disk
     /**
      * Puts the given content into a file at the specified destination path.
      *
-     * @param string $content The content to be stored in the file.
      * @param string $destination The path where the file should be stored.
+     * @param string $content The content to be stored in the file.
      * @return bool True on success, false on failure.
      * @throws \Error If access is denied or there's an error in storing the content.
      */
-    public function put($content, $destination)
+    public function put($destination, $content)
     {
         try {
             $destinationPath = $this->checkAccessAndExistence($destination, false);
@@ -566,6 +567,34 @@ class Disk
         }
 
         return $result;
+    }
+
+    /**
+     * Generates a fully qualified URL for the given file or directory path.
+     *
+     * @param string $path The path of the file or directory.
+     * @return string The fully qualified URL.
+     */
+    public function url($path)
+    {
+        return rtrim($this->url,'/').'/'.ltrim($path, '/');
+    }
+
+    /**
+     * Retrieves the content of a file at the specified path within the allowed scope.
+     *
+     * @param string $path The path to the file.
+     * @return string|null The content of the file, or null if the file is not found or an error occurs.
+     */
+    public function get($path)
+    {
+        $sourcePath = $this->checkAccessAndExistence($path, false);
+
+        try {
+            return $this->fs->get($sourcePath);
+        } catch(Exception $e) {
+            return null;
+        }
     }
 
     /**

@@ -913,7 +913,7 @@ class Builder
      */
     public function first($columns = ['*'])
     {
-        return $this->limit(1)->get($columns);
+        return $this->limit(1)->get($columns)->first();
     }
 
     /**

@@ -129,9 +129,9 @@ class Builder
      */
     public function first(...$parameters)
     {
-        $result = $this->handleCall('first', $parameters);
+        $result = $this->query->first(...$parameters);
 
-        return $result->first();
+        return $this->hydrate([$result])->first();
     }
 
     /**
@@ -142,9 +142,10 @@ class Builder
      */
     public function find(...$parameters)
     {
-        $result = $this->handleCall('find', $parameters);
+        $columns = isset($parameters[1]) ? $parameters[1] : ['*'];
+        $result = $this->query->where($this->model->getKeyName(), '=', $parameters[0])->first($columns);
 
-        return $result->first();
+        return $this->hydrate([$result])->first();
     }
 
     /**
