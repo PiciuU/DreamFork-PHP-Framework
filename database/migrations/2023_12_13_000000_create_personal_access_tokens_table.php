@@ -6,7 +6,7 @@ CREATE TABLE `personal_access_tokens` (
     `token` VARCHAR(64) NOT NULL,
     `last_used_at` TIMESTAMP,
     `expires_at` TIMESTAMP,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`), UNIQUE `personal_access_tokens_token_unique`(`token`), UNIQUE `personal_access_tokens_tokenable_type_tokenable_id_index`(`tokenable_type`,`tokenable_id`)
+    `created_at` TIMESTAMP,
+    `updated_at` TIMESTAMP,
+    PRIMARY KEY (`id`), UNIQUE `personal_access_tokens_token_unique`(`token`), INDEX `personal_access_tokens_tokenable_type_tokenable_id_index`(`tokenable_type`,`tokenable_id`)
 ) ENGINE = InnoDB;

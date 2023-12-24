@@ -241,13 +241,12 @@ class Grammar extends BaseGrammar
     protected function compileJoins(Builder $query, $joins)
     {
         return collect($joins)->map(function ($join) use ($query) {
+            $join = (object) $join;
             $table = $this->wrapTable($join->table);
 
-            $nestedJoins = is_null($join->joins) ? '' : ' '.$this->compileJoins($query, $join->joins);
+            $tableAndNestedJoins = "{$table} {$join->method} {$this->columnize([$join->first])} {$join->operator} {$this->columnize([$join->second])}";
 
-            $tableAndNestedJoins = is_null($join->joins) ? $table : '('.$table.$nestedJoins.')';
-
-            return trim("{$join->type} join {$tableAndNestedJoins} {$this->compileWheres($join)}");
+            return trim("{$join->type} JOIN {$tableAndNestedJoins}");
         })->implode(' ');
     }
 

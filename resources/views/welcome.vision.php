@@ -6,9 +6,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="description" content="Welcome to the introductory page of the DreamFork framework - a lightweight and fast tool for web application development">
 
+        <link rel="icon" type="image/x-icon" href="favicon.ico">
+
         <title>Dreamfork</title>
 
-        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -18,7 +19,7 @@
 
         <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" media="print" onload="this.media='all'" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
         <style>
             @resource(css/welcome.css);
@@ -28,7 +29,10 @@
         <div id="app">
             <header>
                 <div class="header__content">
-                    <div class="header__logo">DreamFork</div>
+                    <div class="header__logo">
+                        @resource(icons/logo.svg);
+                        <span>Dreamfork</span>
+                    </div>
                     <div class="header__version-info">Dreamfork v{{ app()->version() }} (PHP v{{ PHP_VERSION }})</div>
                 </div>
             </header>
@@ -37,13 +41,13 @@
                 <div class="main__content">
                     <h1> The PHP Framework </h1>
                     <h2> Dreamfork is a nimble and swift web application framework inspired by <a href="https://laravel.com" target="_blank">Laravel</a>, offering a lightweight and expressive syntax for seamless development.</h2>
-                    <a class="main__btn" href="https://dev.dream-speak.pl/dreamfork/" target="_blank">Start today</a>
+                    <a class="main__btn" href="https://dreamfork.dream-speak.pl/" target="_blank">Start today</a>
                 </div>
             </main>
 
             <footer>
                 <div class="footer__content">
-                <a href="https://dev.dream-speak.pl/dreamfork/docs/" target="_blank">
+                <a href="https://dreamfork.dream-speak.pl/docs/1.x/" target="_blank">
                         <div class="footer__feature">
                             <div class="feature__icon">
                                 <span class="material-symbols-outlined">
@@ -60,7 +64,7 @@
                             </div>
                         </div>
                     </a>
-                    <a href="https://dev.dream-speak.pl/dreamfork/examples/" target="_blank">
+                    <a href="https://dev.dream-speak.pl/dreamfork/docs/1.x/examples" target="_blank">
                         <div class="footer__feature">
                             <div class="feature__icon">
                                 <span class="material-symbols-outlined">
@@ -72,7 +76,7 @@
                                     Examples of Usage
                                 </div>
                                 <div class="feature__description">
-                                Inspiring implementation demos
+                                    Inspiring implementation demos
                                 </div>
                             </div>
                         </div>

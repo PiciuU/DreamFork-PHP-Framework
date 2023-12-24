@@ -99,7 +99,7 @@ trait ValidatesAttributes
      */
     public function validateGt($attribute, $value, $parameters)
     {
-        return $this->validateNumeric($attribute, $value) && (float) $value > (float) $parameters[0];
+        return $this->validateNumeric($attribute, $value) && (float) $value > (float) ($this->getValue($parameters[0]) ?? $parameters[0]);
     }
 
     /**
@@ -112,7 +112,7 @@ trait ValidatesAttributes
      */
     public function validateGte($attribute, $value, $parameters)
     {
-        return $this->validateNumeric($attribute, $value) && (float) $value >= (float) $parameters[0];
+        return $this->validateNumeric($attribute, $value) && (float) $value >= (float) ($this->getValue($parameters[0]) ?? $parameters[0]);
     }
 
     /**
@@ -125,7 +125,7 @@ trait ValidatesAttributes
      */
     public function validateLt($attribute, $value, $parameters)
     {
-        return $this->validateNumeric($attribute, $value) && (float) $value < (float) $parameters[0];
+        return $this->validateNumeric($attribute, $value) && (float) $value < (float) ($this->getValue($parameters[0]) ?? $parameters[0]);
     }
 
     /**
@@ -138,7 +138,7 @@ trait ValidatesAttributes
      */
     public function validateLte($attribute, $value, $parameters)
     {
-        return $this->validateNumeric($attribute, $value) && (float) $value <= (float) $parameters[0];
+        return $this->validateNumeric($attribute, $value) && (float) $value <= (float) ($this->getValue($parameters[0]) ?? $parameters[0]);
     }
 
     /**
@@ -151,7 +151,7 @@ trait ValidatesAttributes
      */
     public function validateMax($attribute, $value, $parameters)
     {
-        return $this->validateNumeric($attribute, $value) && (float) $value <= (float) $parameters[0];
+        return $this->validateNumeric($attribute, $value) && (float) $value <= (float) ($this->getValue($parameters[0]) ?? $parameters[0]);
     }
 
     /**
@@ -164,7 +164,7 @@ trait ValidatesAttributes
      */
     public function validateMin($attribute, $value, $parameters)
     {
-        return $this->validateNumeric($attribute, $value) && (float) $value >= (float) $parameters[0];
+        return $this->validateNumeric($attribute, $value) && (float) $value >= (float) ($this->getValue($parameters[0]) ?? $parameters[0]);
     }
 
     /**

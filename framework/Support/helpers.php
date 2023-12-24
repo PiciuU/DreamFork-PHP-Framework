@@ -288,13 +288,13 @@ if (!function_exists('asset')) {
  * @return \Framework\Services\URL\UrlGenerator|string
  */
 if (!function_exists('url')) {
-    function url($path = null, $parameters = [], $secure = null)
+    function url($path = null, $secure = null)
     {
         if (is_null($path)) {
             return app('url');
         }
 
-        return app('url')->to($path, $parameters, $secure);
+        return app('url')->to($path, $secure);
     }
 }
 

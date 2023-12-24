@@ -65,11 +65,9 @@ class TokenGuard
         if (!is_null($token) && str_contains($token, '|')) {
             $model = new PersonalAccessToken();
 
-            if ($model->getKeyType() === 'int') {
-                [$id, $token] = explode('|', $token, 2);
+            [$id, $token] = explode('|', $token, 2);
 
-                return ctype_digit($id) && !empty($token);
-            }
+            return ctype_digit($id) && !empty($token);
         }
 
         return !empty($token);

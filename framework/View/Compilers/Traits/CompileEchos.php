@@ -36,11 +36,9 @@ trait CompileEchos
         $pattern = sprintf('/(@)?%s\s*(.+?)\s*%s(\r?\n)?/s', $this->contentTags[0], $this->contentTags[1]);
 
         $callback = function ($matches) {
-            $whitespace = empty($matches[3]) ? '' : $matches[3].$matches[3];
-
+            $whitespace = empty($matches[3]) ? '' : $matches[3];
             $wrapped = sprintf($this->echoFormat, $matches[2]);
-
-            return $matches[1] ? substr($matches[0], 1) : "<?php echo {$wrapped}; ?>{$whitespace}";
+            return $matches[1] ? substr($matches[0], 1) : "<?php echo {$wrapped}; ?>".$whitespace;
         };
 
         return preg_replace_callback($pattern, $callback, $content);

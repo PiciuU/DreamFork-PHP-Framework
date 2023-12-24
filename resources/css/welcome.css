@@ -38,7 +38,7 @@ html, body {
 
 header {
     width: 100%;
-    height: 50px;
+    height: 75px;
 }
 
 .header__content {
@@ -47,6 +47,8 @@ header {
     display: flex;
     justify-content: space-between;
     padding: 10px 50px;
+    align-items: center;
+    height: 100%;
 }
 
 .header__content::after {
@@ -58,6 +60,22 @@ header {
     margin: 0 auto;
     width: 90%;
     border-bottom: 1px solid gray;
+}
+
+.header__logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header__logo svg {
+    width: 48px;
+    height: 48px;
+}
+
+.header__logo span {
+    font-size: 2rem;
+    font-weight: bold;
 }
 
 main {
@@ -75,6 +93,7 @@ main {
     justify-content: center;
     align-items: center;
     z-index: 1;
+    padding: 20px 20px;
 }
 
 .main__content h1 {
@@ -91,7 +110,7 @@ main {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -55%);
-    font-size: 16rem;
+    font-size: clamp(3rem, 16rem, 15vw);
     font-weight: bold;
     opacity: .05;
     color: var(--color-primary);
@@ -140,7 +159,7 @@ footer {
     max-width: 1600px;
     display: flex;
     justify-content: space-around;
-    padding: 20px 50px;
+    padding: 20px 20px;
 }
 
 .footer__content a {
@@ -180,19 +199,15 @@ footer {
 }
 
 @media screen and (max-width: 992px) {
+    header {
+        height: 110px;
+    }
+
     .header__content {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 15px;
-    }
-
-    .main__content {
-        padding: 0px 20px;
-    }
-
-    .main__content h1::after {
-        display: none;
+        gap: 10px;
     }
 
     .footer__content {
@@ -202,6 +217,7 @@ footer {
     }
 
     .footer__content a {
-        width: 350px;
+        width: 100%;
+        max-width: 350px;
     }
 }

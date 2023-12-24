@@ -2,7 +2,11 @@
 
 namespace Framework\Database\ORM;
 
+use JsonSerializable;
+
 use Framework\Support\Str;
+
+use Carbon\Carbon;
 
 /**
  * Class Model
@@ -13,7 +17,7 @@ use Framework\Support\Str;
  *
  * @package Framework\Database\ORM
  */
-abstract class Model
+abstract class Model implements JsonSerializable
 {
     use Traits\GuardsAttributes, Traits\HasAttributes, Traits\HidesAttributes;
 
@@ -51,6 +55,13 @@ abstract class Model
      * @var bool
      */
     protected $exists = false;
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = true;
 
     /**
      * The name of the "created at" column.
@@ -304,6 +315,15 @@ abstract class Model
      */
     public function performUpdate($query)
     {
+        if ($this->usesTimestamps()) {
+            $this->mergeFillable([$this->getCreatedAtColumn(), $this->getUpdatedAtColumn()]);
+
+            $this->fill(array_merge($this->getAttributes(), [
+                $this->getUpdatedAtColumn() => Carbon::now()
+            ]));
+        }
+
+
         $dirty = $this->getDirty();
 
         if (count($dirty) > 0) {
@@ -321,6 +341,16 @@ abstract class Model
      */
     protected function performInsert($query)
     {
+        if ($this->usesTimestamps()) {
+            $this->mergeFillable([$this->getCreatedAtColumn(), $this->getUpdatedAtColumn()]);
+
+            $this->fill(array_merge($this->getAttributes(), [
+                $this->getCreatedAtColumn() => Carbon::now(),
+                $this->getUpdatedAtColumn() => Carbon::now()
+            ]));
+        }
+
+
         $attributes = $this->getAttributesForInsert();
 
         if ($this->getIncrementing()) {
@@ -466,6 +496,36 @@ abstract class Model
     }
 
     /**
+     * Determine if the model uses timestamps.
+     *
+     * @return bool
+     */
+    public function usesTimestamps()
+    {
+        return $this->timestamps;
+    }
+
+    /**
+     * Get the name of the "created at" column.
+     *
+     * @return string|null
+     */
+    public function getCreatedAtColumn()
+    {
+        return static::CREATED_AT;
+    }
+
+    /**
+     * Get the name of the "updated at" column.
+     *
+     * @return string|null
+     */
+    public function getUpdatedAtColumn()
+    {
+        return static::UPDATED_AT;
+    }
+
+    /**
      * Get the model's attributes as an array.
      *
      * @return array
@@ -473,6 +533,16 @@ abstract class Model
     public function toArray()
     {
         return $this->attributesToArray();
+    }
+
+    /**
+     * Convert the object into something JSON serializable.
+     *
+     * @return mixed
+     */
+    public function jsonSerialize(): mixed
+    {
+        return $this->toArray();
     }
 
     /**

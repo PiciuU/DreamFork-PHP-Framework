@@ -56,4 +56,27 @@ class ValidatedInput
 
         return Arr::except($this->input, $keys);
     }
+
+    /**
+     * Dynamically access input data.
+     *
+     * @param  string  $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->input[$name];
+    }
+
+    /**
+     * Dynamically set input data.
+     *
+     * @param  string  $name
+     * @param  mixed  $value
+     * @return mixed
+     */
+    public function __set($name, $value)
+    {
+        $this->input[$name] = $value;
+    }
 }
