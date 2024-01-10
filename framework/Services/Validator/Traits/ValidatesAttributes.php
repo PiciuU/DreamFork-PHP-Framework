@@ -151,6 +151,7 @@ trait ValidatesAttributes
      */
     public function validateMax($attribute, $value, $parameters)
     {
+        $value = $this->getSize($attribute, $value);
         return $this->validateNumeric($attribute, $value) && (float) $value <= (float) ($this->getValue($parameters[0]) ?? $parameters[0]);
     }
 
@@ -164,6 +165,7 @@ trait ValidatesAttributes
      */
     public function validateMin($attribute, $value, $parameters)
     {
+        $value = $this->getSize($attribute, $value);
         return $this->validateNumeric($attribute, $value) && (float) $value >= (float) ($this->getValue($parameters[0]) ?? $parameters[0]);
     }
 

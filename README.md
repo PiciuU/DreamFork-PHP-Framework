@@ -1,5 +1,5 @@
-<p align="center"><a href="https://dreamfork.dream-speak.pl" target="_blank"><img src="https://raw.githubusercontent.com/PiciuU/DreamFork-PHP-Framework/af10e176afad1dab39f368689a5448069a3532f7/resources/icons/logo.svg" width="200" alt="Dreamfork Logo"></a></p>
- 
+<p align="center"><a href="https://dreamfork.dream-speak.pl" target="_blank"><img src="https://raw.githubusercontent.com/PiciuU/DreamFork-PHP-Framework/master/resources/icons/logo.svg" width="200" alt="Dreamfork Logo"></a></p>
+
  # DreamFork
 
 **Note:** DreamFork is currently under active development and represents a snapshot of its current state. The framework is evolving, and significant changes may occur.

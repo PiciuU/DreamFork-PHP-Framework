@@ -107,6 +107,10 @@ class Builder
 
             return $models;
         }
+        else if (is_numeric($result))
+        {
+            return $result;
+        }
 
         return $this;
     }
@@ -131,6 +135,8 @@ class Builder
     {
         $result = $this->query->first(...$parameters);
 
+        if (!$result) return null;
+
         return $this->hydrate([$result])->first();
     }
 
@@ -144,6 +150,8 @@ class Builder
     {
         $columns = isset($parameters[1]) ? $parameters[1] : ['*'];
         $result = $this->query->where($this->model->getKeyName(), '=', $parameters[0])->first($columns);
+
+        if (!$result) return null;
 
         return $this->hydrate([$result])->first();
     }

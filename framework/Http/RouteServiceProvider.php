@@ -58,10 +58,10 @@ class RouteServiceProvider
 
         $pathInfo = $request->getPathInfo();
 
-        $matchingInterface = null;
+        $matchingInterface = [];
 
         foreach ($this->availableInterfaces as $interfaceName => $interfaceData) {
-            if ($interfaceData['enabled'] && strpos($pathInfo, $interfaceData['prefix'].'/') === 0) {
+            if ($interfaceData['enabled'] && strpos($pathInfo, $interfaceData['prefix']) === 0) {
                 $matchingInterface['name'] = $interfaceName;
                 $matchingInterface['prefix'] = $interfaceData['prefix'];
                 $matchingInterface['request-headers'] = $interfaceData['request-headers'];

@@ -130,17 +130,28 @@ class Storage
     private function getAbsoluteFilePath($path) : string
     {
         $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
-        $parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), 'strlen');
+        $parts = explode(DIRECTORY_SEPARATOR, $path);
+
         $absolutes = [];
         foreach ($parts as $part) {
-            if ('.' == $part) continue;
-            if ('..' == $part) {
+            if ($part === '.' || $part === '') {
+                continue;
+            }
+
+            if ($part === '..') {
                 array_pop($absolutes);
             } else {
                 $absolutes[] = $part;
             }
         }
-        return implode(DIRECTORY_SEPARATOR, $absolutes);
+
+        $absolutePath = implode(DIRECTORY_SEPARATOR, $absolutes);
+
+        if (PHP_OS_FAMILY !== "Windows") {
+            $absolutePath = DIRECTORY_SEPARATOR . $absolutePath;
+        }
+
+        return $absolutePath;
     }
 
 }

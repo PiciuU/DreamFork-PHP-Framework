@@ -28,7 +28,7 @@ class ExceptionRenderer
             'code' => $code
         ];
 
-        return view('exceptions\exception_basic', $data);
+        return view('exceptions/exception_basic', $data);
     }
 
     /**
@@ -52,7 +52,7 @@ class ExceptionRenderer
             'trace' => $this->debug_backtrace_string($context['exception']->getTrace())
         ];
 
-        return view('exceptions\exception_debug', $data);
+        return view('exceptions/exception_debug', $data);
     }
 
     /**

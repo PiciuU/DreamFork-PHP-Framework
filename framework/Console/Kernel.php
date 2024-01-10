@@ -20,7 +20,7 @@ class Kernel {
      * Run the command specified by the developer.
      */
     public function run() {
-        $commandName = $this->getCommandName();
+        $commandName = ucfirst($this->getCommandName());
         $commandNameFunction = $this->getCommandNameFunction();
         $commandNameParameters = $this->getCommandNameParameters();
 
