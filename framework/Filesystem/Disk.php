@@ -86,30 +86,9 @@ class Disk
         $realScopePath = realpath($this->root);
         $realRequestedPath = realpath($path);
         if (empty($realRequestedPath)) {
-            $realRequestedPath = $this->getAbsoluteFilePath($path);
+            $realRequestedPath = absolute_path($path);
         }
         return strpos($realRequestedPath, $realScopePath) === 0;
-    }
-
-    /**
-     * Converts a path to an absolute path, removing references to parent directories.
-     *
-     * @param string $path The path to convert.
-     * @return string The absolute path after conversion.
-     */
-    private function getAbsoluteFilePath($path) {
-        $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
-        $parts = array_filter(explode(DIRECTORY_SEPARATOR, $path), 'strlen');
-        $absolutes = [];
-        foreach ($parts as $part) {
-            if ('.' == $part) continue;
-            if ('..' == $part) {
-                array_pop($absolutes);
-            } else {
-                $absolutes[] = $part;
-            }
-        }
-        return implode(DIRECTORY_SEPARATOR, $absolutes);
     }
 
     /**

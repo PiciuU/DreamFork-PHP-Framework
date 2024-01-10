@@ -342,3 +342,38 @@ if (!function_exists('response')) {
         return $factory->make($content, $status, $headers);
     }
 }
+
+/**
+ * Convert a given path to its absolute form.
+ *
+ * @param string $path The path to convert.
+ * @return string The absolute path after conversion.
+ */
+if (!function_exists('absolute_path')) {
+    function absolute_path($path)
+    {
+        $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+        $parts = explode(DIRECTORY_SEPARATOR, $path);
+
+        $absolutes = [];
+        foreach ($parts as $part) {
+            if ($part === '.' || $part === '') {
+                continue;
+            }
+
+            if ($part === '..') {
+                array_pop($absolutes);
+            } else {
+                $absolutes[] = $part;
+            }
+        }
+
+        $absolutePath = implode(DIRECTORY_SEPARATOR, $absolutes);
+
+        if (PHP_OS_FAMILY !== "Windows") {
+            $absolutePath = DIRECTORY_SEPARATOR . $absolutePath;
+        }
+
+        return $absolutePath;
+    }
+}

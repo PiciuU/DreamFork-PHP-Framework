@@ -38,6 +38,15 @@ class ExceptionHandler extends Logger
     protected $dontReport = [];
 
     /**
+     * List of exceptions for which flash messages should not be displayed when debug mode is disabled.
+     *
+     * @var array
+     */
+    protected $dontFlash = [
+        Database\QueryExecutionError::class
+    ];
+
+    /**
      * Create a new ExceptionHandler instance.
      */
     public function __construct() {
@@ -92,6 +101,29 @@ class ExceptionHandler extends Logger
         }
 
         if ($isExceptionInDontReport) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine if the exception should not be flashed.
+     *
+     * @param Throwable $e The exception to check.
+     * @return bool True if the exception should not be flashed, otherwise false.
+     */
+    protected function shouldntFlash(Throwable $e) {
+        $isExceptionInDontFlash = false;
+
+        foreach ($this->dontFlash as $type) {
+            if ($e instanceof $type) {
+                $isExceptionInDontFlash = true;
+                break;
+            }
+        }
+
+        if ($isExceptionInDontFlash) {
             return true;
         }
 
@@ -165,8 +197,20 @@ class ExceptionHandler extends Logger
             'line' => $e->getLine(),
             'trace' => collect($e->getTrace())->map(fn ($trace) => Arr::except($trace, ['args']))->all(),
         ] : [
-            'message' => $e->getMessage() ?? 'Server Error',
+            'message' => $this->buildSafeExceptionMessage($e),
         ];
+    }
+
+    /**
+     * Build a safe exception message to be displayed.
+     *
+     * @param Throwable $e The exception for which to build a safe message.
+     * @return string The safe exception message.
+     */
+    protected function buildSafeExceptionMessage($e)
+    {
+        $message = $e->getMessage() ?? 'Server Error';
+        return $this->shouldntFlash($e) ? 'Server Error' : $message;
     }
 
     /**

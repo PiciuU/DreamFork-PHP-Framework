@@ -93,7 +93,7 @@ class Router
      */
     private function runRoute(Request $request, $routes): mixed
     {
-        foreach($this->requestedInterface['request-headers'] as $key => $value) {
+        foreach ($this->requestedInterface['request-headers'] ?? [] as $key => $value) {
             $request->headers->set($key, $value);
         }
 

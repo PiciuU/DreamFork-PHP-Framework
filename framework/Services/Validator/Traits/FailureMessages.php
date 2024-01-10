@@ -35,8 +35,20 @@ trait FailureMessages
         'lowercase' => 'The :attribute field must be lowercase.',
         'lt' => 'The :attribute field must be less than :lt.',
         'lte' => 'The :attribute field must be less than or equal to :lte.',
-        'max' => 'The :attribute field must not be greater than :max.',
-        'min' => 'The :attribute field must be at least :min.',
+        'max' => [
+            'array' => 'The :attribute field must not contain more than :max items.',
+            'file' => 'The :attribute field must not exceed :max kilobytes.',
+            'numeric' => 'The :attribute field must not exceed :max.',
+            'string' => 'The :attribute field must not exceed :max characters.',
+            'default' => 'The :attribute field must not exceed :max in size.'
+        ],
+        'min' => [
+            'array' => 'The :attribute field must contain at least :min items.',
+            'file' => 'The :attribute field must be at least :min kilobytes.',
+            'numeric' => 'The :attribute field must be at least :min.',
+            'string' => 'The :attribute field must be at least :min characters.',
+            'default' => 'The :attribute field must be at least :min in size.'
+        ],
         'not_in' => 'The selected :attribute is invalid.',
         'not_regex' => 'The :attribute field format is invalid.',
         'numeric' => 'The :attribute field must be a number.',
@@ -48,7 +60,7 @@ trait FailureMessages
             'file' => 'The :attribute field must be :size kilobytes.',
             'numeric' => 'The :attribute field must be :size.',
             'string' => 'The :attribute field must be :size characters.',
-            'default' => 'The :attribute field must be :size in a size.'
+            'default' => 'The :attribute field must be :size in size.'
         ],
         'starts_with' => 'The :attribute field must start with one of the following: :starts_with.',
         'string' => 'The :attribute field must be a string.',
