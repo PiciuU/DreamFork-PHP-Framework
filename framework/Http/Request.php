@@ -4,6 +4,7 @@ namespace Framework\Http;
 
 use Framework\Support\Facades\Auth;
 use Framework\Support\Arr;
+use Framework\Support\Str;
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
@@ -63,6 +64,79 @@ class Request extends SymfonyRequest
     public function validate(array $rules, array $messages = [], array $attributes = [])
     {
         return validator($this->all(), $rules, $messages, $attributes)->validate();
+    }
+
+    /**
+     * Determine if the current request URL and query string match a pattern.
+     *
+     * @param  mixed  ...$patterns
+     * @return bool
+     */
+    public function fullUrlIs(...$patterns)
+    {
+        $url = $this->fullUrl();
+
+        return collect($patterns)->contains(fn ($pattern) => Str::is($pattern, $url));
+    }
+
+    /**
+     * Get the full URL for the request.
+     *
+     * @return string
+     */
+    public function fullUrl()
+    {
+        $query = $this->getQueryString();
+
+        $question = $this->getBaseUrl().$this->getPathInfo() === '/' ? '/?' : '?';
+
+        return $query ? $this->url().$question.$query : $this->url();
+    }
+
+    /**
+     * Get the URL (no query string) for the request.
+     *
+     * @return string
+     */
+    public function url()
+    {
+        return rtrim(preg_replace('/\?.*/', '', $this->getUri()), '/');
+    }
+
+
+    /**
+     * Determine if the current request URI matches a pattern.
+     *
+     * @param  mixed  ...$patterns
+     * @return bool
+     */
+    public function is(...$patterns)
+    {
+        $path = $this->decodedPath();
+
+        return collect($patterns)->contains(fn ($pattern) => Str::is($pattern, $path));
+    }
+
+    /**
+     * Get the current decoded path info for the request.
+     *
+     * @return string
+     */
+    public function decodedPath()
+    {
+        return rawurldecode($this->path());
+    }
+
+    /**
+     * Get the current path info for the request.
+     *
+     * @return string
+     */
+    public function path()
+    {
+        $pattern = trim($this->getPathInfo(), '/');
+
+        return $pattern === '' ? '/' : $pattern;
     }
 
     /**
