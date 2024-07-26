@@ -3,6 +3,7 @@
 namespace Framework\Http;
 
 use Carbon\Carbon;
+use Framework\Http\Middleware\HandleCors;
 
 /**
  * Class Kernel
@@ -43,6 +44,15 @@ class Kernel
     private $request;
 
     /**
+     * The global HTTP middleware stack.
+     *
+     * @var array
+     */
+    protected $middleware = [
+        HandleCors::class,
+    ];
+
+    /**
      * Kernel constructor.
      *
      * Initializes the Kernel instance and sets up the router.
@@ -76,7 +86,7 @@ class Kernel
         $this->bootstrap();
 
         try {
-            $response = $this->dispatchToRouter($this->request);
+            $response = $this->sendThroughMiddleware($this->request);
         }
         catch (Throwable $e) {
             throw $e;
@@ -96,13 +106,35 @@ class Kernel
         }
     }
 
+     /**
+     * Send the request through the defined middleware stack.
+     *
+     * @param Framework\Http\Request $request The incoming HTTP request.
+     * @return mixed The response after processing through middleware.
+     */
+    protected function sendThroughMiddleware($request)
+    {
+        $next = function($request) {
+            return $this->dispatchToRouter($request);
+        };
+
+        foreach ($this->middleware as $middleware) {
+            $next = function($request) use ($middleware, $next) {
+                return (new $middleware)->handle($request, $next);
+            };
+        }
+
+        return $next($request);
+    }
+
     /**
      * Dispatch the HTTP request to the router for processing.
      *
      * @param Framework\Http\Request $request The incoming HTTP request.
      * @return mixed The response returned by the router.
      */
-    protected function dispatchToRouter($request) {
+    protected function dispatchToRouter($request)
+    {
         return $this->router->dispatch($request);
     }
 

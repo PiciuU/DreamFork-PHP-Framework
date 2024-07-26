@@ -4,6 +4,7 @@ namespace Framework\Support\Collections;
 
 use ArrayAccess;
 use JsonSerializable;
+use stdClass;
 
 use Framework\Support\Arr;
 
@@ -81,6 +82,29 @@ class Collection implements \Iterator, ArrayAccess, JsonSerializable
     public function count()
     {
         return count($this->items);
+    }
+
+    /**
+     * Determine if an item exists in the collection.
+     *
+     * @param  (callable(TValue, TKey): bool)|TValue|string  $key
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @return bool
+     */
+    public function contains($key, $operator = null, $value = null)
+    {
+        if (func_num_args() === 1) {
+            if ($this->useAsCallable($key)) {
+                $placeholder = new stdClass;
+
+                return $this->first($key, $placeholder) !== $placeholder;
+            }
+
+            return in_array($key, $this->items);
+        }
+
+        return $this->contains($this->operatorForWhere(...func_get_args()));
     }
 
     /**
@@ -313,6 +337,61 @@ class Collection implements \Iterator, ArrayAccess, JsonSerializable
 
             return $value;
         }, $this->all());
+    }
+
+
+    /**
+     * Get an operator checker callback.
+     *
+     * @param  callable|string  $key
+     * @param  string|null  $operator
+     * @param  mixed  $value
+     * @return \Closure
+     */
+    protected function operatorForWhere($key, $operator = null, $value = null)
+    {
+        if ($this->useAsCallable($key)) {
+            return $key;
+        }
+
+        if (func_num_args() === 1) {
+            $value = true;
+
+            $operator = '=';
+        }
+
+        if (func_num_args() === 2) {
+            $value = $operator;
+
+            $operator = '=';
+        }
+
+        return function ($item) use ($key, $operator, $value) {
+            $retrieved = data_get($item, $key);
+
+            $strings = array_filter([$retrieved, $value], function ($value) {
+                return is_string($value) || (is_object($value) && method_exists($value, '__toString'));
+            });
+
+            if (count($strings) < 2 && count(array_filter([$retrieved, $value], 'is_object')) == 1) {
+                return in_array($operator, ['!=', '<>', '!==']);
+            }
+
+            switch ($operator) {
+                default:
+                case '=':
+                case '==':  return $retrieved == $value;
+                case '!=':
+                case '<>':  return $retrieved != $value;
+                case '<':   return $retrieved < $value;
+                case '>':   return $retrieved > $value;
+                case '<=':  return $retrieved <= $value;
+                case '>=':  return $retrieved >= $value;
+                case '===': return $retrieved === $value;
+                case '!==': return $retrieved !== $value;
+                case '<=>': return $retrieved <=> $value;
+            }
+        };
     }
 
 }
