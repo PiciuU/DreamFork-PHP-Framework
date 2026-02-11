@@ -21,7 +21,14 @@ class Application extends Container
      *
      * @var string
      */
-    const VERSION = '1.0.2';
+    const VERSION = '1.0.3';
+
+    /**
+     * The instance of the app.
+     *
+     * @var Application
+     */
+    public $app;
 
     /**
      * Base path of the application.
@@ -314,6 +321,7 @@ class Application extends Container
             'url' => [\Framework\Services\URL\UrlGenerator::class],
             'validator' => [\Framework\Services\Validator\Factory::class],
             'view' => [\Framework\View\Factory::class],
+            'cache' => [\Framework\Cache\CacheManager::class],
         ] as $key => $aliases) {
             foreach ($aliases as $alias) {
                 $this->alias($key, $alias);

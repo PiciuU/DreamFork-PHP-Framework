@@ -15,6 +15,17 @@ use Exception;
 class Filesystem extends SymfonyFilesystem
 {
     /**
+     * Determine if a file or directory exists.
+     *
+     * @param  string  $path
+     * @return bool
+     */
+    public function exists($path): bool
+    {
+        return file_exists($path);
+    }
+
+    /**
      * Checks if the given path points to a regular file.
      *
      * @param string $path The path to check.
@@ -68,6 +79,45 @@ class Filesystem extends SymfonyFilesystem
     public function put($path, $contents)
     {
         return file_put_contents($path, $contents);
+    }
+
+    /**
+     * Delete the file at a given path.
+     *
+     * @param  string|array  $paths
+     * @return bool
+     */
+    public function delete($paths)
+    {
+        try {
+            $this->remove($paths);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Create a directory.
+     *
+     * @param  string  $path
+     * @param  int  $mode
+     * @param  bool  $recursive
+     * @param  bool  $force
+     * @return bool
+     */
+    public function makeDirectory($path, $mode = 0755, $recursive = false, $force = false)
+    {
+        if ($force) {
+            return @mkdir($path, $mode, $recursive);
+        }
+
+        try {
+            $this->mkdir($path, $mode);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     /**

@@ -3,8 +3,11 @@
 namespace Framework\Http;
 
 use Symfony\Component\HttpFoundation\JsonResponse as SymfonyJsonResponse;
+use Framework\Contracts\Support\Jsonable;
+use Framework\Contracts\Support\Arrayable;
 
 use InvalidArgumentException;
+use JsonSerializable;
 
 /**
  * Class JsonResponse
@@ -16,6 +19,13 @@ use InvalidArgumentException;
  */
 class JsonResponse extends SymfonyJsonResponse
 {
+    /**
+     * The original data of the response.
+     *
+     * @var mixed
+     */
+    public $original;
+
     /**
      * Create a new JsonResponse instance.
      *
@@ -41,7 +51,6 @@ class JsonResponse extends SymfonyJsonResponse
     {
         $this->original = $data;
 
-        // Ensure json_last_error() is cleared...
         json_decode('[]');
 
         $this->data = match (true) {
@@ -58,7 +67,7 @@ class JsonResponse extends SymfonyJsonResponse
         return $this->update();
     }
 
-        /**
+    /**
      * Determine if an error occurred during JSON encoding.
      *
      * @param  int  $jsonError
@@ -71,11 +80,11 @@ class JsonResponse extends SymfonyJsonResponse
         }
 
         return $this->hasEncodingOption(JSON_PARTIAL_OUTPUT_ON_ERROR) &&
-                    in_array($jsonError, [
-                        JSON_ERROR_RECURSION,
-                        JSON_ERROR_INF_OR_NAN,
-                        JSON_ERROR_UNSUPPORTED_TYPE,
-                    ]);
+            in_array($jsonError, [
+                JSON_ERROR_RECURSION,
+                JSON_ERROR_INF_OR_NAN,
+                JSON_ERROR_UNSUPPORTED_TYPE,
+            ]);
     }
 
     /**
