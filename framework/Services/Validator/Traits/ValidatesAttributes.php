@@ -464,15 +464,17 @@ trait ValidatesAttributes
      */
     protected function getSize($attribute, $value)
     {
+        $hasNumeric = $this->hasRule($attribute, ['Numeric', 'Integer']);
+
         if (is_numeric($value) && $hasNumeric) {
-            return int ($value);
+            return (float) $value;
         } elseif (is_array($value)) {
             return count($value);
         } elseif ($value instanceof File) {
             return $value->getSize() / 1024;
         }
 
-        return mb_strlen($value ?? '');
+        return mb_strlen((string) ($value ?? ''));
     }
 
     /**
