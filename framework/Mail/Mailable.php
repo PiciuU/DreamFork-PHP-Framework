@@ -25,6 +25,13 @@ abstract class Mailable
     public $from = [];
 
     /**
+     * Adres Reply-To.
+     *
+     * @var array|null
+     */
+    public $replyTo = null;
+
+    /**
      * Build the message.
      *
      * @return $this
@@ -56,6 +63,23 @@ abstract class Mailable
     public function from(string $address, string $name = null): self
     {
         $this->from = ['address' => $address, 'name' => $name];
+        return $this;
+    }
+
+    /**
+     * Set the "reply to" address of the message.
+     *
+     * @param string $address
+     * @param string|null $name
+     * @return $this
+     */
+    public function replyTo(string $address, string $name = null): self
+    {
+        $this->replyTo = [
+            'address' => $address,
+            'name' => $name,
+        ];
+
         return $this;
     }
 }

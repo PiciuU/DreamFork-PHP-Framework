@@ -56,6 +56,13 @@ class Mailer
             ->subject($mailable->subject)
             ->html($html);
 
+        if ($mailable->replyTo) {
+            $email->replyTo(new Address(
+                $mailable->replyTo['address'],
+                $mailable->replyTo['name'] ?? ''
+            ));
+        }
+
         $this->transport->send($email);
     }
 }
