@@ -21,7 +21,7 @@ class Application extends Container
      *
      * @var string
      */
-    const VERSION = '1.0.3';
+    const VERSION = '1.0.4';
 
     /**
      * The instance of the app.
@@ -322,6 +322,7 @@ class Application extends Container
             'validator' => [\Framework\Services\Validator\Factory::class],
             'view' => [\Framework\View\Factory::class],
             'cache' => [\Framework\Cache\CacheManager::class],
+            'mail' => [\Framework\Mail\MailManager::class],
         ] as $key => $aliases) {
             foreach ($aliases as $alias) {
                 $this->alias($key, $alias);
